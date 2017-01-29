@@ -20,7 +20,9 @@ Apocalypse game.  It has VERY little functionality.
 -}
 
 module ApocStrategyHuman (
-   human
+   human,
+   human2,
+   whiteHuman
    ) where
 
 import ApocTools
@@ -31,3 +33,11 @@ import ApocTools
 human    :: Chooser
 human b Normal        c = return (Just [(0,0),(2,1)])
 human b PawnPlacement c = return (Just [(2,2)])
+
+human2    :: Chooser
+human2 b Normal        c = return (Just [(2,1),(3,3)])
+human2 b PawnPlacement c = return (Just [(2,2)])
+
+whiteHuman    :: Chooser
+whiteHuman b Normal        c = return (Just [(0,4),(1,2)])
+whiteHuman b PawnPlacement c = return (Just [(2,2)])
