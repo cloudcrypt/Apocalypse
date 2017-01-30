@@ -55,30 +55,106 @@ processTurn     :: GameState -> IO ()
 processTurn g = do
   -- check end game
   putStrLn (show g)
-  black <- human (g) Normal Black
-  white <- whiteHuman (g) Normal White
-  -- processTurn $ performMoves black white g
-  putStrLn (show $ performMoves black white g)
+  white <- human (g) Normal White
+  black <- blackHuman (g) Normal Black
+  --processTurn $ performMoves white black g
+  putStrLn (show $ performMoves white black g)
 
 -- check stuff
 -- resolve issues
 -- modify black and white moves (coordinates accordingly)
 -- then call modifyGameState twice as we are doing now
 performMoves    :: Maybe [(Int,Int)] -> Maybe [(Int,Int)] -> GameState -> GameState
-performMoves black white g = modifyGameState black (modifyGameState white g)
+performMoves white black g = modifyGameState (verifyMoves white black g) g
 
-modifyGameState :: Maybe [(Int,Int)] -> GameState -> GameState
-modifyGameState move g = GameState (if move==Nothing
-                                then Passed
-                                else Played (head (fromJust move), head (tail (fromJust move))))
-                               (blackPen g)
-                               (Passed)
-                               (whitePen g)
-                               (replace2 (replace2 (theBoard g)
-                                                   ((fromJust move) !! 1)
-                                                   (getFromBoard (theBoard g) ((fromJust move) !! 0)))
-                                         ((fromJust move) !! 0)
+verifyMoves     :: Maybe [(Int,Int)] -> Maybe [(Int,Int)] -> GameState -> ((Played, Int), (Played, Int), [BoardModification])
+verifyMoves white black g = let (wPlay, wPenalty) = if white==Nothing 
+                                                    then (Passed, 0)
+                                                    else (verifyMoveLegality (fromJust white) White g)
+                                (bPlay, bPenalty) = if black==Nothing
+                                                    then (Passed, 0)
+                                                    else (verifyMoveLegality (fromJust black) Black g)
+                            in ((wPlay, wPenalty),
+                                (bPlay, bPenalty),
+                                (addModification wPlay bPlay [] g))
+
+addModification     :: Played -> Played -> [BoardModification] -> GameState -> [BoardModification]
+addModification (Played ((x11,y11),(x12,y12))) (Played ((x21,y21),(x22,y22))) mods g = mods ++ [Move (x11,y11) (x12,y12)] ++ [Move (x21,y21) (x22,y22)]
+addModification _ _ mods g = mods
+
+-- addModification wPlay bPlay mods g = if ((wPlay!=Nothing) && (bPlay!=Nothing))
+--                                      then if ((wPlay!=Goofed) && (bPlay!=Goofed))
+--                                           then if 
+--                                           else if (wPlay!=Nothing)
+--                                      else if (wPlay!=Nothing)
+
+-- getCell             :: Played -> GameState -> Cell
+-- getCell play g = 
+
+verifyMoveLegality  :: [(Int, Int)] -> Player -> GameState -> (Played, Int)
+verifyMoveLegality move p g = let (x1,y1) = (move !! 0)
+                                  (x2,y2) = (move !! 1)
+                                  cell1 = getFromBoard (theBoard g) (x1,y1)
+                                  cell2 = getFromBoard (theBoard g) (x2,y2)
+                              in if ((cell1==E) || ((playerOf (pieceOf cell1))/=p))
+                                 then ((Goofed ((x1,y1), (x2,y2))), 1)
+                                 else if cell1==cell2
+                                      then ((Goofed ((x1,y1), (x2,y2))), 1)
+                                      else if (verifyPieceDest (pieceTypeOf cell1) cell1 cell2 (x1,y1) (x2,y2))
+                                           then ((Played ((x1,y1), (x2,y2))), 0)
+                                           else ((Goofed ((x1,y1), (x2,y2))), 1)  
+
+verifyPieceDest    :: PieceType -> Cell -> Cell -> (Int, Int) -> (Int, Int) -> Bool
+verifyPieceDest Knight _ dstCell (x1,y1) (x2,y2) = let columnDiff = abs (x2 - x1)
+                                                       rowDiff = abs (y2 - y1)
+                                                   in (((columnDiff==1) && (rowDiff==2)) || ((columnDiff==2) && (rowDiff==1)))                                   
+verifyPieceDest Pawn WP dstCell (x1,y1) (x2,y2) = if (y2==(y1+1))
+                                                  then if (x2==x1)
+                                                       then True
+                                                       else (((abs (x2-x1))==1) && ((dstCell==BP) || (dstCell==BK)))
+                                                  else False
+verifyPieceDest Pawn BP dstCell (x1,y1) (x2,y2) = if (y2==(y1-1))
+                                                  then if (x2==x1)
+                                                       then True
+                                                       else (((abs (x2-x1))==1) && ((dstCell==WP) || (dstCell==WK)))
+                                                  else False                                                                             
+
+data PieceType  = Pawn | Knight
+-- | Given a 'Cell', return the corresponding 'Piece'.
+pieceTypeOf     :: Cell -> PieceType
+pieceTypeOf BK = Knight
+pieceTypeOf WK = Knight
+pieceTypeOf BP = Pawn
+pieceTypeOf WP = Pawn
+
+modifyGameState :: ((Played, Int), (Played, Int), [BoardModification]) -> GameState -> GameState
+modifyGameState ((wPlay, wPenalty), (bPlay, bPenalty), mods) g = 
+  GameState (bPlay)
+         ((blackPen g) + bPenalty)
+         (wPlay)
+         ((whitePen g) + wPenalty)
+         (applyBoardModifications mods (theBoard g))
+
+data BoardModification = Move (Int, Int) (Int, Int)
+                       | Delete (Int, Int)
+                       | Place Cell (Int, Int)
+
+applyBoardModifications   :: [BoardModification] -> Board -> Board
+applyBoardModifications [] b = b
+applyBoardModifications (x:xs) b = applyBoardModifications xs (modifyBoard x b)
+
+modifyBoard   :: BoardModification -> Board -> Board
+modifyBoard (Move (x1,y1) (x2,y2)) b = (replace2 (replace2 b
+                                                   (x2,y2)
+                                                   (getFromBoard b (x1,y1)))
+                                         (x1,y1)
                                          E)
+modifyBoard (Delete (x,y)) b = (replace2 b
+                                         (x,y)
+                                         E)
+modifyBoard (Place c (x,y)) b = (replace2 b
+                                         (x,y)
+                                         c)
 
 ---2D list utility functions-------------------------------------------------------
 
