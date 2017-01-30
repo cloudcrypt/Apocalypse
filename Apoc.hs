@@ -76,11 +76,13 @@ verifyMoves white black g = let (wPlay, wPenalty) = if white==Nothing
                                                     else (verifyMoveLegality (fromJust black) Black g)
                             in ((wPlay, wPenalty),
                                 (bPlay, bPenalty),
-                                (addModification wPlay bPlay [] g))
+                                (addModifications wPlay bPlay [] g))
 
-addModification     :: Played -> Played -> [BoardModification] -> GameState -> [BoardModification]
-addModification (Played ((x11,y11),(x12,y12))) (Played ((x21,y21),(x22,y22))) mods g = mods ++ [Move (x11,y11) (x12,y12)] ++ [Move (x21,y21) (x22,y22)]
-addModification _ _ mods g = mods
+addModifications     :: Played -> Played -> [BoardModification] -> GameState -> [BoardModification]
+addModifications (Played ((ax1,ay1),(ax2,ay2))) (Played ((bx1,by1),(bx2,by2))) mods g = mods ++ [Move (ax1,ay1) (ax2,ay2)] ++ [Move (bx1,by1) (bx2,by2)]
+addModifications (Played ((ax1,ay1),(ax2,ay2))) (Goofed ((bx1,by1),(bx2,by2))) mods g = mods ++ [Move (ax1,ay1) (ax2,ay2)]
+addModifications (Goofed ((ax1,ay1),(ax2,ay2))) (Played ((bx1,by1),(bx2,by2))) mods g = mods ++ [Move (bx1,by1) (bx2,by2)]
+addModifications _ _ mods g = mods
 
 -- addModification wPlay bPlay mods g = if ((wPlay!=Nothing) && (bPlay!=Nothing))
 --                                      then if ((wPlay!=Goofed) && (bPlay!=Goofed))
