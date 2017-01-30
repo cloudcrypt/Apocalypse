@@ -55,9 +55,18 @@ processTurn     :: GameState -> IO ()
 processTurn g = do
   -- check end game
   putStrLn (show g)
-  white <- human (g) Normal White
+  white <- whiteHuman (g) Normal White
   black <- blackHuman (g) Normal Black
-  --processTurn $ performMoves white black g
+  processTurn2 $ performMoves white black g
+  --putStrLn (show $ performMoves white black g)
+
+processTurn2     :: GameState -> IO ()
+processTurn2 g = do
+  -- check end game
+  putStrLn (show g)
+  white <- whiteHuman2 (g) Normal White
+  black <- blackHuman2 (g) Normal Black
+  --processTurn2 $ performMoves white black g
   putStrLn (show $ performMoves white black g)
 
 -- check stuff
@@ -79,7 +88,17 @@ verifyMoves white black g = let (wPlay, wPenalty) = if white==Nothing
                                 (addModifications wPlay bPlay [] g))
 
 addModifications     :: Played -> Played -> [BoardModification] -> GameState -> [BoardModification]
-addModifications (Played ((ax1,ay1),(ax2,ay2))) (Played ((bx1,by1),(bx2,by2))) mods g = mods ++ [Move (ax1,ay1) (ax2,ay2)] ++ [Move (bx1,by1) (bx2,by2)]
+addModifications (Played ((ax1,ay1),(ax2,ay2))) (Played ((bx1,by1),(bx2,by2))) mods g = let cellA = getFromBoard (theBoard g) (ax1,ay1)
+                                                                                            cellB = getFromBoard (theBoard g) (bx1,by1)
+                                                                                        in if (((ax2,ay2)==(bx2,by2)) && (cellA==cellB))
+                                                                                            then mods ++ [Delete (ax1,ay1)] ++ [Delete (bx1,by1)]
+                                                                                            else mods ++ [Delete (ax1,ay1)] ++ [Delete (bx1,by1)] 
+                                                                                                      ++ if ((ax2,ay2)==(bx2,by2))
+                                                                                                         then if ((pieceTypeOf cellA)==Knight)
+                                                                                                              then [Place cellA (ax2,ay2)]
+                                                                                                              else [Place cellB (bx2,by2)]
+                                                                                                         else [Place cellA (ax2,ay2)] ++ [Place cellB (bx2,by2)]
+-- addModifications (Played ((ax1,ay1),(ax2,ay2))) (Played ((bx1,by1),(bx2,by2))) mods g = mods ++ [Move (ax1,ay1) (ax2,ay2)] ++ [Move (bx1,by1) (bx2,by2)]
 addModifications (Played ((ax1,ay1),(ax2,ay2))) (Goofed ((bx1,by1),(bx2,by2))) mods g = mods ++ [Move (ax1,ay1) (ax2,ay2)]
 addModifications (Goofed ((ax1,ay1),(ax2,ay2))) (Played ((bx1,by1),(bx2,by2))) mods g = mods ++ [Move (bx1,by1) (bx2,by2)]
 addModifications _ _ mods g = mods
@@ -121,7 +140,7 @@ verifyPieceDest Pawn BP dstCell (x1,y1) (x2,y2) = if (y2==(y1-1))
                                                        else (((abs (x2-x1))==1) && ((dstCell==WP) || (dstCell==WK)))
                                                   else False                                                                             
 
-data PieceType  = Pawn | Knight
+data PieceType  = Pawn | Knight deriving (Eq)
 -- | Given a 'Cell', return the corresponding 'Piece'.
 pieceTypeOf     :: Cell -> PieceType
 pieceTypeOf BK = Knight
