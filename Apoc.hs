@@ -85,47 +85,39 @@ verifyMoves white black g = let (wPlay, wPenalty) = if white==Nothing
                                                     else (verifyMoveLegality (fromJust black) Black g)
                             in ((wPlay, wPenalty),
                                 (bPlay, bPenalty),
-                                (addModifications wPlay bPlay [] g))
+                                (addModifications wPlay bPlay g))
 
-addModifications     :: Played -> Played -> [BoardModification] -> GameState -> [BoardModification]
-addModifications (Played ((ax1,ay1),(ax2,ay2))) (Played ((bx1,by1),(bx2,by2))) mods g = let cellA = getFromBoard (theBoard g) (ax1,ay1)
-                                                                                            cellB = getFromBoard (theBoard g) (bx1,by1)
-                                                                                        in if (((ax2,ay2)==(bx2,by2)) && (cellA==cellB))
-                                                                                            then mods ++ [Delete (ax1,ay1)] ++ [Delete (bx1,by1)]
-                                                                                            else mods ++ [Delete (ax1,ay1)] ++ [Delete (bx1,by1)] 
-                                                                                                      ++ if ((ax2,ay2)==(bx2,by2))
-                                                                                                         then if ((pieceTypeOf cellA)==Knight)
-                                                                                                              then [Place cellA (ax2,ay2)]
-                                                                                                              else [Place cellB (bx2,by2)]
-                                                                                                         else [Place cellA (ax2,ay2)] ++ [Place cellB (bx2,by2)]
--- addModifications (Played ((ax1,ay1),(ax2,ay2))) (Played ((bx1,by1),(bx2,by2))) mods g = mods ++ [Move (ax1,ay1) (ax2,ay2)] ++ [Move (bx1,by1) (bx2,by2)]
-addModifications (Played ((ax1,ay1),(ax2,ay2))) (Goofed ((bx1,by1),(bx2,by2))) mods g = mods ++ [Move (ax1,ay1) (ax2,ay2)]
-addModifications (Goofed ((ax1,ay1),(ax2,ay2))) (Played ((bx1,by1),(bx2,by2))) mods g = mods ++ [Move (bx1,by1) (bx2,by2)]
-addModifications _ _ mods g = mods
-
--- addModification wPlay bPlay mods g = if ((wPlay!=Nothing) && (bPlay!=Nothing))
---                                      then if ((wPlay!=Goofed) && (bPlay!=Goofed))
---                                           then if 
---                                           else if (wPlay!=Nothing)
---                                      else if (wPlay!=Nothing)
-
--- getCell             :: Played -> GameState -> Cell
--- getCell play g = 
+addModifications     :: Played -> Played -> GameState -> [BoardModification]
+addModifications (Played ((ax1,ay1),(ax2,ay2))) (Played ((bx1,by1),(bx2,by2))) g = let cellA = getFromBoard (theBoard g) (ax1,ay1)
+                                                                                       cellB = getFromBoard (theBoard g) (bx1,by1)
+                                                                                       in [Delete (ax1,ay1)] ++ [Delete (bx1,by1)]
+                                                                                          ++ case (((ax2,ay2)==(bx2,by2)),(cellA==cellB),(pieceTypeOf cellA)) of
+                                                                                              (False,_,_) -> [Place cellA (ax2,ay2)] ++ [Place cellB (bx2,by2)]
+                                                                                              (True,True,_) -> []
+                                                                                              (True,False,Knight) -> [Place cellA (ax2,ay2)]
+                                                                                              (True,False,Pawn) -> [Place cellB (bx2,by2)]
+addModifications (Played ((ax1,ay1),(ax2,ay2))) (Goofed ((bx1,by1),(bx2,by2))) g = [Move (ax1,ay1) (ax2,ay2)]
+addModifications (Goofed ((ax1,ay1),(ax2,ay2))) (Played ((bx1,by1),(bx2,by2))) g = [Move (bx1,by1) (bx2,by2)]
+addModifications _ _ g = []
 
 verifyMoveLegality  :: [(Int, Int)] -> Player -> GameState -> (Played, Int)
 verifyMoveLegality move p g = let (x1,y1) = (move !! 0)
                                   (x2,y2) = (move !! 1)
                                   cell1 = getFromBoard (theBoard g) (x1,y1)
                                   cell2 = getFromBoard (theBoard g) (x2,y2)
-                              in if ((cell1==E) || ((playerOf (pieceOf cell1))/=p))
-                                 then ((Goofed ((x1,y1), (x2,y2))), 1)
-                                 else if cell1==cell2
-                                      then ((Goofed ((x1,y1), (x2,y2))), 1)
-                                      else if (verifyPieceDest (pieceTypeOf cell1) cell1 cell2 (x1,y1) (x2,y2))
-                                           then ((Played ((x1,y1), (x2,y2))), 0)
-                                           else ((Goofed ((x1,y1), (x2,y2))), 1)  
+                                  cell1Player = playerOf (pieceOf cell1)
+                              in case ((cell1==E) || (cell1Player/=p) || (samePlayer cell1 cell2)) of
+                                True -> ((Goofed ((x1,y1), (x2,y2))), 1)
+                                False -> if (verifyPieceDest (pieceTypeOf cell1) cell1 cell2 (x1,y1) (x2,y2))
+                                         then ((Played ((x1,y1), (x2,y2))), 0)
+                                         else ((Goofed ((x1,y1), (x2,y2))), 1)
 
-verifyPieceDest    :: PieceType -> Cell -> Cell -> (Int, Int) -> (Int, Int) -> Bool
+samePlayer        :: Cell -> Cell -> Bool
+samePlayer cell1 cell2 = case ((cell1==E) || (cell2==E)) of
+                          True -> False
+                          False -> (playerOf (pieceOf cell1))==(playerOf (pieceOf cell2))
+
+verifyPieceDest   :: PieceType -> Cell -> Cell -> (Int, Int) -> (Int, Int) -> Bool
 verifyPieceDest Knight _ dstCell (x1,y1) (x2,y2) = let columnDiff = abs (x2 - x1)
                                                        rowDiff = abs (y2 - y1)
                                                    in (((columnDiff==1) && (rowDiff==2)) || ((columnDiff==2) && (rowDiff==1)))                                   
