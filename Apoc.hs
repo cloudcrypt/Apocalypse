@@ -36,41 +36,26 @@ import ApocStrategyHuman
 ---Main-------------------------------------------------------------
 
 -- | The main entry, which just calls 'main'' with the command line arguments.
-main = do
-  g <- main' (unsafePerformIO getArgs)
-  processTurn g
+main = main' (unsafePerformIO getArgs)
 
 {- | We have a main' IO function so that we can either:
 
      1. call our program from GHCi in the usual way
      2. run from the command line by calling this function with the value from (getArgs)
 -}
-main'           :: [String] -> IO GameState
+main'           :: [String] -> IO ()
 main' args = do
-    putStrLn "\nThe initial board:"
-    print initBoard
-
-    putStrLn $ "\nThe initial board with move human (the placeholder for human) strategy having played one move\n"
-               ++ "(clearly illegal as we must play in rounds!):"
-    move <- human (initBoard) Normal Black
-    --return GameState ((if move==Nothing
-    --                            then Passed
-    --                            else Played (head (fromJust move), head (tail (fromJust move))))
-    --                           (movePen initBoard)
-    --                           (Passed)
-    --                           (whitePen initBoard)
-    --                           (replace2 (replace2 (theBoard initBoard) -- put knight at new location
-    --                                               ((fromJust move) !! 1)
-    --                                               (getFromBoard (theBoard initBoard) ((fromJust move) !! 0)))
-    --                                     ((fromJust move) !! 0)
-    --                                     E)) -- put empty at knight's old location
-    return $ modifyGameState move initBoard
+    -- check if args is anything
+    -- if so:
+    putStrLn "Possible strategies:\n  human\n"
+    -- print all strategies
+    processTurn initBoard
 
 processTurn     :: GameState -> IO ()
 processTurn g = do
   -- check end game
   putStrLn (show g)
-  black <- human2 (g) Normal Black
+  black <- human (g) Normal Black
   white <- whiteHuman (g) Normal White
   -- processTurn $ performMoves black white g
   putStrLn (show $ performMoves black white g)
@@ -94,8 +79,6 @@ modifyGameState move g = GameState (if move==Nothing
                                                    (getFromBoard (theBoard g) ((fromJust move) !! 0)))
                                          ((fromJust move) !! 0)
                                          E)
-
---resolveStates :: GameState -> GameState -> GameState
 
 ---2D list utility functions-------------------------------------------------------
 
