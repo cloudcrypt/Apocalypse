@@ -58,7 +58,8 @@ processTurn g = do
   putStrLn (show g)
   white <- whiteHuman (g) Normal White
   black <- blackHuman (g) Normal Black
-  processTurn2 $ performMoves white black g
+  newState <- verifyPawnUpgrade $ performMoves white black g
+  processTurn2 newState
   --putStrLn (show $ performMoves white black g)
 
 processTurn2     :: GameState -> IO ()
@@ -67,8 +68,38 @@ processTurn2 g = do
   putStrLn (show g)
   white <- whiteHuman2 (g) Normal White
   black <- blackHuman2 (g) Normal Black
+  newState <- verifyPawnUpgrade $ performMoves white black g
   --processTurn2 $ performMoves white black g
-  putStrLn (show $ performMoves white black g)
+  putStrLn (show $ newState)
+
+verifyPawnUpgrade  :: GameState -> IO GameState
+verifyPawnUpgrade g = case ((whitePlay g),(blackPlay g)) of
+                        (Played (_,(x1,y1)),Played (_,(x2,y2))) -> do
+                          state <- processPawnUpgrade (whitePlay g) White g
+                          processPawnUpgrade (blackPlay g) Black state
+                        (Played (_,(x,y)),_) -> do
+                          processPawnUpgrade (whitePlay g) White g
+                        (_,Played (_,(x,y))) -> do
+                          processPawnUpgrade (blackPlay g) Black g
+                        (_,_) -> do
+                          return g
+
+processPawnUpgrade :: Played -> Player -> GameState -> IO GameState
+processPawnUpgrade played player g
+  | (reachedLastRank played player) = do
+    putStrLn (show g)
+    -- if there are less than two knights for this player type, then do this:
+    return $ performPawnUpgrade player played g
+  | otherwise = do
+    return g
+
+performPawnUpgrade :: Player -> Played -> GameState -> GameState
+performPawnUpgrade White (Played (_,(x2,y2))) g = let wPlay = UpgradedPawn2Knight (x2,y2)
+                                                      bPlay = None
+                                                  in modifyGameState ((wPlay,0),(bPlay,0),(addModifications wPlay bPlay g)) g
+performPawnUpgrade Black (Played (_,(x2,y2))) g = let wPlay = None
+                                                      bPlay = UpgradedPawn2Knight (x2,y2)
+                                                  in modifyGameState ((wPlay,0),(bPlay,0),(addModifications bPlay wPlay g)) g
 
 -- check stuff
 -- resolve issues
@@ -97,8 +128,12 @@ addModifications (Played ((ax1,ay1),(ax2,ay2))) (Played ((bx1,by1),(bx2,by2))) g
                                                                                           (True,True,_) -> []
                                                                                           (True,False,Knight) -> [Place cellA (ax2,ay2)]
                                                                                           (True,False,Pawn) -> [Place cellB (bx2,by2)]
-addModifications (Played ((ax1,ay1),(ax2,ay2))) (Goofed ((bx1,by1),(bx2,by2))) g = [Move (ax1,ay1) (ax2,ay2)]
-addModifications (Goofed ((ax1,ay1),(ax2,ay2))) (Played ((bx1,by1),(bx2,by2))) g = [Move (bx1,by1) (bx2,by2)]
+addModifications (Played ((ax1,ay1),(ax2,ay2))) _ g = [Move (ax1,ay1) (ax2,ay2)]
+addModifications _ (Played ((bx1,by1),(bx2,by2))) g = [Move (bx1,by1) (bx2,by2)] 
+addModifications (UpgradedPawn2Knight (x,y)) None g = let player = playerOf (pieceOf (getFromBoard (theBoard g) (x,y)))
+                                                      in case player of
+                                                        White -> [Place WK (x,y)]
+                                                        Black -> [Place BK (x,y)]                                                        
 addModifications _ _ g = []
 
 verifyMoveLegality  :: [(Int, Int)] -> Player -> GameState -> (Played, Int)
@@ -117,13 +152,13 @@ verifyPieceDest   :: PieceType -> Cell -> Cell -> (Int, Int) -> (Int, Int) -> Bo
 verifyPieceDest Knight _ dstCell (x1,y1) (x2,y2) = let columnDiff = abs (x2 - x1)
                                                        rowDiff = abs (y2 - y1)
                                                    in (((columnDiff==1) && (rowDiff==2)) || ((columnDiff==2) && (rowDiff==1)))                                   
-verifyPieceDest Pawn WP dstCell (x1,y1) (x2,y2) = if (y2==(y1+1))
-                                                  then if (x2==x1)
+verifyPieceDest Pawn WP dstCell (x1,y1) (x2,y2) = if y2==(y1+1)
+                                                  then if x2==x1
                                                        then True
                                                        else (((abs (x2-x1))==1) && ((dstCell==BP) || (dstCell==BK)))
                                                   else False
-verifyPieceDest Pawn BP dstCell (x1,y1) (x2,y2) = if (y2==(y1-1))
-                                                  then if (x2==x1)
+verifyPieceDest Pawn BP dstCell (x1,y1) (x2,y2) = if y2==(y1-1)
+                                                  then if x2==x1
                                                        then True
                                                        else (((abs (x2-x1))==1) && ((dstCell==WP) || (dstCell==WK)))
                                                   else False                                                                             

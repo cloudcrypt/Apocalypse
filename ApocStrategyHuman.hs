@@ -31,18 +31,34 @@ import ApocTools
 {- | This is just a placeholder for the human strategy: it always chooses to play
      (0,0) to (2,1).
 -}
+-- whiteHuman    :: Chooser
+-- whiteHuman b Normal        c = return (Just [(0,0),(2,1)])
+-- whiteHuman b PawnPlacement c = return (Just [(2,2)])
+
+-- whiteHuman2    :: Chooser
+-- whiteHuman2 b Normal        c = return (Just [(2,1),(1,3)])
+-- whiteHuman2 b PawnPlacement c = return (Just [(2,2)])
+
+-- blackHuman    :: Chooser
+-- blackHuman b Normal        c = return (Just [(1,4),(1,3)])
+-- blackHuman b PawnPlacement c = return (Just [(2,2)])
+
+-- blackHuman2    :: Chooser
+-- blackHuman2 b Normal        c = return (Just [(1,3),(1,2)])
+-- blackHuman2 b PawnPlacement c = return (Just [(2,2)])
+
 whiteHuman    :: Chooser
-whiteHuman b Normal        c = return (Just [(0,0),(2,1)])
+whiteHuman b Normal        c = return Nothing
 whiteHuman b PawnPlacement c = return (Just [(2,2)])
 
 whiteHuman2    :: Chooser
-whiteHuman2 b Normal        c = return (Just [(2,1),(1,3)])
+whiteHuman2 b Normal        c = return Nothing
 whiteHuman2 b PawnPlacement c = return (Just [(2,2)])
 
 blackHuman    :: Chooser
-blackHuman b Normal        c = return (Just [(1,4),(1,3)])
+blackHuman b Normal        c = return (Just [(1,2),(1,1)])
 blackHuman b PawnPlacement c = return (Just [(2,2)])
 
 blackHuman2    :: Chooser
-blackHuman2 b Normal        c = return (Just [(1,3),(1,2)])
+blackHuman2 b Normal        c = return (Just [(1,1),(1,0)])
 blackHuman2 b PawnPlacement c = return (Just [(2,2)])
