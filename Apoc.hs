@@ -30,6 +30,7 @@ import Data.Maybe (fromJust, isNothing)
 import System.Environment
 import System.IO.Unsafe
 import ApocTools
+import ApocUtility
 import ApocStrategyHuman
 
 
@@ -90,12 +91,12 @@ verifyMoves white black g = let (wPlay, wPenalty) = if white==Nothing
 addModifications     :: Played -> Played -> GameState -> [BoardModification]
 addModifications (Played ((ax1,ay1),(ax2,ay2))) (Played ((bx1,by1),(bx2,by2))) g = let cellA = getFromBoard (theBoard g) (ax1,ay1)
                                                                                        cellB = getFromBoard (theBoard g) (bx1,by1)
-                                                                                       in [Delete (ax1,ay1)] ++ [Delete (bx1,by1)]
-                                                                                          ++ case (((ax2,ay2)==(bx2,by2)),(cellA==cellB),(pieceTypeOf cellA)) of
-                                                                                              (False,_,_) -> [Place cellA (ax2,ay2)] ++ [Place cellB (bx2,by2)]
-                                                                                              (True,True,_) -> []
-                                                                                              (True,False,Knight) -> [Place cellA (ax2,ay2)]
-                                                                                              (True,False,Pawn) -> [Place cellB (bx2,by2)]
+                                                                                   in [Delete (ax1,ay1)] ++ [Delete (bx1,by1)]
+                                                                                      ++ case (((ax2,ay2)==(bx2,by2)),(cellA==cellB),(pieceTypeOf cellA)) of
+                                                                                          (False,_,_) -> [Place cellA (ax2,ay2)] ++ [Place cellB (bx2,by2)]
+                                                                                          (True,True,_) -> []
+                                                                                          (True,False,Knight) -> [Place cellA (ax2,ay2)]
+                                                                                          (True,False,Pawn) -> [Place cellB (bx2,by2)]
 addModifications (Played ((ax1,ay1),(ax2,ay2))) (Goofed ((bx1,by1),(bx2,by2))) g = [Move (ax1,ay1) (ax2,ay2)]
 addModifications (Goofed ((ax1,ay1),(ax2,ay2))) (Played ((bx1,by1),(bx2,by2))) g = [Move (bx1,by1) (bx2,by2)]
 addModifications _ _ g = []
@@ -112,11 +113,6 @@ verifyMoveLegality move p g = let (x1,y1) = (move !! 0)
                                          then ((Played ((x1,y1), (x2,y2))), 0)
                                          else ((Goofed ((x1,y1), (x2,y2))), 1)
 
-samePlayer        :: Cell -> Cell -> Bool
-samePlayer cell1 cell2 = case ((cell1==E) || (cell2==E)) of
-                          True -> False
-                          False -> (playerOf (pieceOf cell1))==(playerOf (pieceOf cell2))
-
 verifyPieceDest   :: PieceType -> Cell -> Cell -> (Int, Int) -> (Int, Int) -> Bool
 verifyPieceDest Knight _ dstCell (x1,y1) (x2,y2) = let columnDiff = abs (x2 - x1)
                                                        rowDiff = abs (y2 - y1)
@@ -131,14 +127,6 @@ verifyPieceDest Pawn BP dstCell (x1,y1) (x2,y2) = if (y2==(y1-1))
                                                        then True
                                                        else (((abs (x2-x1))==1) && ((dstCell==WP) || (dstCell==WK)))
                                                   else False                                                                             
-
-data PieceType  = Pawn | Knight deriving (Eq)
--- | Given a 'Cell', return the corresponding 'Piece'.
-pieceTypeOf     :: Cell -> PieceType
-pieceTypeOf BK = Knight
-pieceTypeOf WK = Knight
-pieceTypeOf BP = Pawn
-pieceTypeOf WP = Pawn
 
 modifyGameState :: ((Played, Int), (Played, Int), [BoardModification]) -> GameState -> GameState
 modifyGameState ((wPlay, wPenalty), (bPlay, bPenalty), mods) g = 
