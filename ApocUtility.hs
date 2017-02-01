@@ -1,9 +1,10 @@
 
-module ApocUtility (
+module Main (
     PieceType(Pawn,Knight),
     pieceTypeOf,
     samePlayer,
-    reachedLastRank
+    reachedLastRank,
+    pieceCount
     ) where
 
 import ApocTools
@@ -23,4 +24,15 @@ samePlayer cell1 cell2  = case ((cell1==E) || (cell2==E)) of
 
 reachedLastRank :: Played -> Player -> Bool
 reachedLastRank (Played (_,(x2,y2))) White = y2==4
-reachedLastRank (Played (_,(x2,y2))) Black = y2==0     
+reachedLastRank (Played (_,(x2,y2))) Black = y2==0    
+
+pieceCount     :: Board -> Player -> PieceType -> Int
+pieceCount [] _ _ = 0
+pieceCount (x:xs) p pt = (pieceCountRow x p pt) + (pieceCount xs p pt)
+
+pieceCountRow  :: [Cell] -> Player -> PieceType -> Int
+pieceCountRow [] _ _ = 0
+pieceCountRow (E:xs) p pt = pieceCountRow xs p pt
+pieceCountRow (x:xs) p pt = if ((playerOf (pieceOf x))==p && (pieceTypeOf x)==pt)
+                            then 1 + (pieceCountRow xs p pt)
+                            else pieceCountRow xs p pt
