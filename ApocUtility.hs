@@ -24,7 +24,9 @@ samePlayer cell1 cell2  = case ((cell1==E) || (cell2==E)) of
 
 reachedLastRank :: Played -> Player -> Bool
 reachedLastRank (Played (_,(x2,y2))) White = y2==4
-reachedLastRank (Played (_,(x2,y2))) Black = y2==0    
+reachedLastRank (Played (_,(x2,y2))) Black = y2==0
+-- maybe use this instead? (maybe call it upgradeableMove):
+-- reachedLastRank _ _ = False   
 
 pieceCount     :: Board -> Player -> PieceType -> Int
 pieceCount [] _ _ = 0
