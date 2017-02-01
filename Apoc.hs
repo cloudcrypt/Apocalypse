@@ -89,7 +89,7 @@ verifyPawnUpgrade g = do
 
 processPawnUpgrade :: Played -> Player -> GameState -> IO GameState
 processPawnUpgrade (Played move) player g
-  | (reachedLastRank (Played move) player) = do
+  | (upgradeableMove (Played move) player g) = do
     putStrLn (show g)
     case (pieceCount (theBoard g) player Knight)<2 of
       True -> return $ performPawnUpgrade player (Played move) g
