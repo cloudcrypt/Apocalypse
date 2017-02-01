@@ -1,5 +1,5 @@
 
-module Main (
+module ApocUtility (
     PieceType(Pawn,Knight),
     pieceTypeOf,
     samePlayer,
