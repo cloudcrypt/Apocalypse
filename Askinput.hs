@@ -30,8 +30,19 @@ ranger k (x:xs) =
        then ranger (k-1) xs
        else False
 
+
+pMenu :: IO String
+pMenu = do
+   putStr "1 Aggression Strategy\n"
+   putStr "2 Passive Strategy\n"
+   putStr "3 Daniel's Super Smart Strategy\n"
+   putStr "4 human strategy\n\n"
+   getLine
+
+
 main = do
-   line <- promptLine "Enter the move coordinate for player White in the form 'srcX srcY destX destY 0 <= n < 5, or just enter return for a pass W2: "
-   if ranger  4 ((seperate line) []) == False
-       then main
-       else putStr "Valid input.\n"
+   choice <- pMenu
+   line1 <- promptLine "Enter the move coordinate for player White in the form 'srcX srcY destX destY 0 <= n < 5, or just enter return for a pass W2: "
+           if ranger  4 ((seperate line1) []) == False
+             then main
+             else putStr "Valid input.\n"
