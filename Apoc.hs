@@ -66,8 +66,8 @@ processTurn     :: GameState -> IO ()
 processTurn g = do
   -- check end game
   putStrLn (show g)
-  white <- human (g) Normal White
   black <- human (g) Normal Black
+  white <- human (g) Normal White
   newState <- verifyPawnUpgrade $ performMoves white black g
   processTurn newState
   --putStrLn (show $ performMoves white black g)

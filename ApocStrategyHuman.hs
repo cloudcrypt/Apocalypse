@@ -58,7 +58,9 @@ import Data.Array
 
 human   :: Chooser
 human g Normal p = do
-  input <- promptLine ("enter move for " ++ (show p) ++ ":")
+  input <- promptLine ("Enter the move coordinates for player "
+                      ++ (show p)
+                      ++ " in the form 'srcX srcY destX destY'\n[0 >= n >= 4, or just enter return for a 'pass'] Xn:\n")
   case validateInputMove input of
     Left s -> do
       putStrLn s
