@@ -19,58 +19,25 @@ seperate (x:xs) y =
        else
           seperate xs y
 
-ranger :: Int -> [Int] -> Bool
-ranger 0 [] = True
-ranger 4 [] = True
-ranger 3 [] = False
-ranger 2 [] = False
-ranger 1 [] = False
-ranger k (x:xs) = 
+ranger :: [Int] -> Bool
+ranger [] = True
+ranger (x:xs) = 
     if x < 5 && x >= 0
-       then ranger (k-1) xs
+       then ranger xs
        else False
 
-fetch :: String -> Int
-fetch (x:xs) = digitToInt x
+validateInputMove :: String -> Either String (Maybe [(Int,Int)])
+validateInputMove s = 
+   let list = seperate s []
+       len = length list
+       valid = ranger list
+   in case (len,valid) of
+      (4,True) -> Right (Just [((list !! 0),(list !! 1)),((list !! 2),(list !! 3))])
+      (0,True) -> Right Nothing
+      (4,False) -> Left "Integers out of Range"
+      _ -> Left ((show len) ++ " number of integers found, 4 required")
 
-
-pMenuW :: IO String
-pMenuW = do
-   putStr "Please enter strategy for white player\n"
-   putStr "1 Aggression Strategy\n"
-   putStr "2 Passive Strategy\n"
-   putStr "3 Daniel's Super Smart Strategy\n"
-   putStr "4 human strategy\n\n"
-   getLine
-
-pMenuB :: IO String
-pMenuB = do
-   putStr "Please enter strategy for black player\n"
-   putStr "1 Aggression Strategy\n"
-   putStr "2 Passive Strategy\n"
-   putStr "3 Daniel's Super Smart Strategy\n"
-   putStr "4 human strategy\n\n"
-   getLine
-
-humanMove :: IO [Int]
-humanMove = do 
-   line1 <- promptLine "Enter the move coordinate for player White in the form 'srcX srcY destX destY 0 <= n < 5, or just enter return for a pass W2: "
-   if ranger 4 ((seperate line1) []) == False
-      then humanMove
-      else return ((seperate line1) [])
-   
-   
-manageStrat :: Int -> IO [Int]
-manageStrat 1 = manageStrat 1
-manageStrat 2 = manageStrat 2
-manageStrat 3 = manageStrat 3
-manageStrat 4 = do 
-    move <- humanMove
-    return move
-
-getInput :: IO [Int]
+getInput :: IO (Either String (Maybe [(Int,Int)])) 
 getInput = do
-   choice1 <- pMenuW
-   choice2 <- pMenuB
-   moves <- manageStrat (fetch choice1)
-   return moves
+   line <- promptLine "Enter the move coordinates for player White in the form 'srcX srcY destX destY' [0>= n >=4, or just enter return for a 'pass'"
+   return $ validateInputMove line
