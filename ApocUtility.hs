@@ -7,10 +7,13 @@ module ApocUtility (
     samePlayer,
     upgradeableMove,
     pieceCount
+    --seperate,
+    --ranger
     ) where
 
 import ApocTools
 import ApocStrategyHuman
+--import ApocStrategies
 
 strategies  :: [(String,Chooser)]
 strategies = [("human",whiteHuman)]
@@ -53,3 +56,18 @@ pieceCountRow (E:xs) p pt = pieceCountRow xs p pt
 pieceCountRow (x:xs) p pt = if ((playerOf (pieceOf x))==p && (pieceTypeOf x)==pt)
                             then 1 + (pieceCountRow xs p pt)
                             else pieceCountRow xs p pt
+
+-- seperate :: [Char] -> [Int] -> [Int]
+-- seperate [] y = reverse y
+-- seperate (x:xs) y = 
+--     if isDigit x == True
+--        then seperate xs ((digitToInt(x)):y)
+--        else
+--           seperate xs y
+
+-- ranger :: [Int] -> Bool
+-- ranger [] = True
+-- ranger (x:xs) = 
+--     if x < 5 && x >= 0
+--        then ranger xs
+--        else False                            

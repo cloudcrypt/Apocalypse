@@ -20,6 +20,7 @@ Apocalypse game.  It has VERY little functionality.
 -}
 
 module ApocStrategyHuman (
+   human,
    whiteHuman,
    whiteHuman2,
    blackHuman,
@@ -27,6 +28,12 @@ module ApocStrategyHuman (
    ) where
 
 import ApocTools
+
+import System.Environment
+import System.IO
+import Data.List
+import Data.Char
+import Data.Array
 
 {- | This is just a placeholder for the human strategy: it always chooses to play
      (0,0) to (2,1).
@@ -46,6 +53,20 @@ import ApocTools
 -- blackHuman2    :: Chooser
 -- blackHuman2 b Normal        c = return (Just [(1,3),(1,2)])
 -- blackHuman2 b PawnPlacement c = return (Just [(2,2)])
+-- strategies  :: [(String,Chooser)]
+-- strategies = [("human",whiteHuman)]
+
+human   :: Chooser
+human g Normal p = do
+  input <- promptLine ("enter move for " ++ (show p) ++ ":")
+  case validateInputMove input of
+    Left s -> do
+      putStrLn s
+      human g Normal p
+    Right maybeCoords -> return maybeCoords
+
+human g PawnPlacement p = return Nothing
+
 
 whiteHuman    :: Chooser
 whiteHuman b Normal        c = return Nothing
@@ -62,3 +83,34 @@ blackHuman b PawnPlacement c = return (Just [(2,2)])
 blackHuman2    :: Chooser
 blackHuman2 b Normal        c = return (Just [(1,1),(1,0)])
 blackHuman2 b PawnPlacement c = return (Just [(2,2)])
+
+promptLine :: String -> IO String
+promptLine prompt = do
+   putStr prompt
+   getLine 
+
+validateInputMove :: String -> Either String (Maybe [(Int,Int)])
+validateInputMove s = 
+   let list = seperate s []
+       len = length list
+       valid = ranger list
+   in case (len,valid) of
+      (4,True) -> Right (Just [((list !! 0),(list !! 1)),((list !! 2),(list !! 3))])
+      (0,True) -> Right Nothing
+      (4,False) -> Left "Integers out of Range"
+      _ -> Left ((show len) ++ " number of integers found, 4 required") 
+
+seperate :: [Char] -> [Int] -> [Int]
+seperate [] y = reverse y
+seperate (x:xs) y = 
+    if isDigit x == True
+       then seperate xs ((digitToInt(x)):y)
+       else
+          seperate xs y
+
+ranger :: [Int] -> Bool
+ranger [] = True
+ranger (x:xs) = 
+    if x < 5 && x >= 0
+       then ranger xs
+       else False  
