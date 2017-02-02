@@ -1,5 +1,7 @@
 
 module ApocUtility (
+    strategies,
+    displayStrategies,
     PieceType(Pawn,Knight),
     pieceTypeOf,
     samePlayer,
@@ -8,6 +10,21 @@ module ApocUtility (
     ) where
 
 import ApocTools
+import ApocStrategyHuman
+
+strategies  :: [(String,Chooser)]
+strategies = [("human",whiteHuman)]
+
+displayStrategies :: IO ()
+displayStrategies = do 
+    putStrLn "Possible strategies:"
+    printStrategies strategies
+
+printStrategies :: [(String,Chooser)] -> IO ()
+printStrategies [] = return ()
+printStrategies (x:xs) = do
+    putStrLn ("  " ++ (fst x))
+    printStrategies xs
 
 data PieceType  = Pawn | Knight deriving (Eq)
 -- | Given a 'Cell', return the corresponding 'Piece'.

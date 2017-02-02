@@ -31,6 +31,7 @@ import System.Environment
 import System.IO.Unsafe
 import ApocTools
 import ApocUtility
+import ApocInput
 import ApocStrategyHuman
 
 
@@ -46,11 +47,20 @@ main = main' (unsafePerformIO getArgs)
 -}
 main'           :: [String] -> IO ()
 main' args = do
-    -- check if args is anything
-    -- if so:
-    putStrLn "Possible strategies:\n  human\n"
-    -- print all strategies
-    processTurn initBoard
+  case (length args) of 
+    2 -> do
+      let strats = validateStrategies args
+      case strats of 
+        Nothing -> displayStrategies
+        _ -> processTurn initBoard -- here (fromJust strats) equals a valid (Chooser(Black),Chooser(White))
+    0 -> do
+      stratStrings <- getStrategies
+      let strats = validateStrategies stratStrings
+      case strats of 
+        Nothing -> displayStrategies
+        _ -> processTurn initBoard -- here (fromJust strats) equals a valid (Chooser(Black),Chooser(White))
+    _ -> do
+      displayStrategies
 
 processTurn     :: GameState -> IO ()
 processTurn g = do
