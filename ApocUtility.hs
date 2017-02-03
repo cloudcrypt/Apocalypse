@@ -1,33 +1,16 @@
 
 module ApocUtility (
-    strategies,
-    displayStrategies,
     PieceType(Pawn,Knight),
     pieceTypeOf,
     samePlayer,
     upgradeableMove,
-    pieceCount
-    --seperate,
-    --ranger
+    pieceCount,
+    seperate,
+    ranger
     ) where
 
 import ApocTools
-import ApocStrategyHuman
---import ApocStrategies
-
-strategies  :: [(String,Chooser)]
-strategies = [("human",whiteHuman)]
-
-displayStrategies :: IO ()
-displayStrategies = do 
-    putStrLn "Possible strategies:"
-    printStrategies strategies
-
-printStrategies :: [(String,Chooser)] -> IO ()
-printStrategies [] = return ()
-printStrategies (x:xs) = do
-    putStrLn ("  " ++ (fst x))
-    printStrategies xs
+import Data.Char (isDigit, digitToInt)
 
 data PieceType  = Pawn | Knight deriving (Eq)
 -- | Given a 'Cell', return the corresponding 'Piece'.
@@ -57,17 +40,17 @@ pieceCountRow (x:xs) p pt = if ((playerOf (pieceOf x))==p && (pieceTypeOf x)==pt
                             then 1 + (pieceCountRow xs p pt)
                             else pieceCountRow xs p pt
 
--- seperate :: [Char] -> [Int] -> [Int]
--- seperate [] y = reverse y
--- seperate (x:xs) y = 
---     if isDigit x == True
---        then seperate xs ((digitToInt(x)):y)
---        else
---           seperate xs y
+seperate :: [Char] -> [Int] -> [Int]
+seperate [] y = reverse y
+seperate (x:xs) y = 
+    if isDigit x == True
+       then seperate xs ((digitToInt(x)):y)
+       else
+          seperate xs y
 
--- ranger :: [Int] -> Bool
--- ranger [] = True
--- ranger (x:xs) = 
---     if x < 5 && x >= 0
---        then ranger xs
---        else False                            
+ranger :: [Int] -> Bool
+ranger [] = True
+ranger (x:xs) = 
+    if x < 5 && x >= 0
+       then ranger xs
+       else False                            

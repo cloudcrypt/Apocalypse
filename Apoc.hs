@@ -31,7 +31,7 @@ import System.Environment
 import System.IO.Unsafe
 import ApocTools
 import ApocUtility
-import ApocInput
+import ApocStrategies
 import ApocStrategyHuman
 
 
@@ -72,15 +72,15 @@ processTurn g = do
   processTurn newState
   --putStrLn (show $ performMoves white black g)
 
-processTurn2     :: GameState -> IO ()
-processTurn2 g = do
-  -- check end game
-  putStrLn (show g)
-  white <- whiteHuman2 (g) Normal White
-  black <- blackHuman2 (g) Normal Black
-  newState <- verifyPawnUpgrade $ performMoves white black g
-  --processTurn2 $ performMoves white black g
-  putStrLn (show $ newState)
+-- processTurn2     :: GameState -> IO ()
+-- processTurn2 g = do
+--   -- check end game
+--   putStrLn (show g)
+--   white <- whiteHuman2 (g) Normal White
+--   black <- blackHuman2 (g) Normal Black
+--   newState <- verifyPawnUpgrade $ performMoves white black g
+--   --processTurn2 $ performMoves white black g
+--   putStrLn (show $ newState)
 
 verifyPawnUpgrade  :: GameState -> IO GameState
 verifyPawnUpgrade g = do
@@ -104,7 +104,7 @@ processPawnUpgrade (Played move) player g
     case (pieceCount (theBoard g) player Knight)<2 of
       True -> return $ performPawnUpgrade player (Played move) g
       False -> do
-        placeMove <- whiteHuman g PawnPlacement player
+        placeMove <- human g PawnPlacement player
         return $ performPawnPlace placeMove (snd move) player g
   | otherwise = do
     return g
