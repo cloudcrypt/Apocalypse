@@ -154,8 +154,10 @@ verifyPawnPlace move src p g = let (play, penalty) = if move==Nothing
 addModifications     :: Played -> Played -> GameState -> [BoardModification]
 addModifications (Played ((ax1,ay1),(ax2,ay2))) (Played ((bx1,by1),(bx2,by2))) g = let cellA = getFromBoard (theBoard g) (ax1,ay1)
                                                                                        cellB = getFromBoard (theBoard g) (bx1,by1)
+                                                                                       typeA = pieceTypeOf cellA
+                                                                                       typeB = pieceTypeOf cellB
                                                                                    in [Delete (ax1,ay1)] ++ [Delete (bx1,by1)]
-                                                                                      ++ case (((ax2,ay2)==(bx2,by2)),(cellA==cellB),(pieceTypeOf cellA)) of
+                                                                                      ++ case (((ax2,ay2)==(bx2,by2)),(typeA==typeB),typeA) of
                                                                                           (False,_,_) -> [Place cellA (ax2,ay2)] ++ [Place cellB (bx2,by2)]
                                                                                           (True,True,_) -> []
                                                                                           (True,False,Knight) -> [Place cellA (ax2,ay2)]
