@@ -10,9 +10,10 @@ import Data.Maybe (fromJust, isNothing)
 import Data.Char (toUpper)
 import ApocTools
 import ApocStrategyHuman
+import ApocStrategyGreedy
 
 strategies  :: [(String,Chooser)]
-strategies = [("human",human)]
+strategies = [("human",human),("greedy",greedy)]
 
 displayStrategies :: IO ()
 displayStrategies = do 
