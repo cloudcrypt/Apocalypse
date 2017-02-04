@@ -64,8 +64,15 @@ main' args = do
 
 processTurn     :: GameState -> IO ()
 processTurn g = do
-  -- check end game
   putStrLn (show g)
+
+  if gameOverCheck g == 1
+  then putStrLn "The game is a draw!"
+  else if gameOverCheck g == 2
+  then putStrLn "Black is the winner!"
+  else if gameOverCheck g == 3
+  then putStrLn "White is the winner!"
+  else do
   black <- human (g) Normal Black
   white <- human (g) Normal White
   newState <- verifyPawnUpgrade $ performMoves white black g
@@ -236,6 +243,13 @@ modifyBoard (Place c (x,y)) b = (replace2 b
                                          (x,y)
                                          c)
 
+gameOverCheck :: GameState -> Int
+gameOverCheck g
+    | (pieceCount (theBoard g) White Pawn)==0 && (pieceCount (theBoard g) Black Pawn)==0 = 1
+    | (pieceCount (theBoard g) White Pawn)==0 = 2
+    | (pieceCount (theBoard g) Black Pawn)==0 = 3
+    | otherwise = 4
+
 ---2D list utility functions-------------------------------------------------------
 
 -- | Replaces the nth element in a row with a new element.
@@ -248,4 +262,3 @@ replace xs n elem = let (ys,zs) = splitAt n xs
 -- | Replaces the (x,y)th element in a list of lists with a new element.
 replace2        :: [[a]] -> (Int,Int) -> a -> [[a]]
 replace2 xs (x,y) elem = replace xs y (replace (xs !! y) x elem)
-
