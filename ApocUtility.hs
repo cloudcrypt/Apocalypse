@@ -82,12 +82,12 @@ verifyPieceDest Knight _ dstCell (x1,y1) (x2,y2) = let columnDiff = abs (x2 - x1
                                                    in (((columnDiff==1) && (rowDiff==2)) || ((columnDiff==2) && (rowDiff==1)))                                   
 verifyPieceDest Pawn WP dstCell (x1,y1) (x2,y2) = if y2==(y1+1)
                                                   then if x2==x1
-                                                       then True
+                                                       then dstCell==E
                                                        else (((abs (x2-x1))==1) && ((dstCell==BP) || (dstCell==BK)))
                                                   else False
 verifyPieceDest Pawn BP dstCell (x1,y1) (x2,y2) = if y2==(y1-1)
                                                   then if x2==x1
-                                                       then True
+                                                       then dstCell==E
                                                        else (((abs (x2-x1))==1) && ((dstCell==WP) || (dstCell==WK)))
                                                   else False  
 
