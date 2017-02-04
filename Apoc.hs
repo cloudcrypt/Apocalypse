@@ -52,57 +52,32 @@ main' args = do
       let strats = validateStrategies args
       case strats of 
         Nothing -> displayStrategies
-        _ -> processTurn initBoard -- here (fromJust strats) equals a valid (Chooser(Black),Chooser(White))
+        _ -> processTurn initBoard (fromJust strats) -- here (fromJust strats) equals a valid (Chooser(Black),Chooser(White))
     0 -> do
+      displayStrategies
       stratStrings <- getStrategies
       let strats = validateStrategies stratStrings
       case strats of 
         Nothing -> displayStrategies
-        _ -> processTurn initBoard -- here (fromJust strats) equals a valid (Chooser(Black),Chooser(White))
+        _ -> processTurn initBoard (fromJust strats) -- here (fromJust strats) equals a valid (Chooser(Black),Chooser(White))
     _ -> do
       displayStrategies
 
-processTurn     :: GameState -> IO ()
-processTurn g = do
+processTurn     :: GameState -> ((String,Chooser),(String,Chooser)) -> IO ()
+processTurn g (bChooser,wChooser) = do
   putStrLn (show g)
-
-  if gameOverCheck g == 1
-  then putStrLn "The game is a draw!"
-  else if gameOverCheck g == 2
-  then putStrLn "Black is the winner!"
-  else if gameOverCheck g == 3
-  then putStrLn "White is the winner!"
-  else do
-  black <- human (g) Normal Black
-  white <- human (g) Normal White
-  newState <- verifyPawnUpgrade $ performMoves white black g
-  processTurn newState
-  --putStrLn (show $ performMoves white black g)
-
--- processTurn2     :: GameState -> IO ()
--- processTurn2 g = do
---   -- check end game
---   putStrLn (show g)
---   white <- whiteHuman2 (g) Normal White
---   black <- blackHuman2 (g) Normal Black
---   newState <- verifyPawnUpgrade $ performMoves white black g
---   --processTurn2 $ performMoves white black g
---   putStrLn (show $ newState)
+  case (gameOverCheck g (fst wChooser) (fst bChooser)) of
+    Just str -> do putStrLn str
+    Nothing -> do
+      black <- (snd bChooser) g Normal Black
+      white <- (snd wChooser) g Normal White
+      newState <- verifyPawnUpgrade $ performMoves white black g
+      processTurn newState (bChooser,wChooser)
 
 verifyPawnUpgrade  :: GameState -> IO GameState
 verifyPawnUpgrade g = do
   state <- processPawnUpgrade (whitePlay g) White g
   processPawnUpgrade (blackPlay g) Black state
--- verifyPawnUpgrade g = case ((whitePlay g),(blackPlay g)) of
---                         (Played (_,(x1,y1)),Played (_,(x2,y2))) -> do
---                           state <- processPawnUpgrade (whitePlay g) White g
---                           processPawnUpgrade (blackPlay g) Black state
---                         (Played (_,(x,y)),_) -> do
---                           processPawnUpgrade (whitePlay g) White g
---                         (_,Played (_,(x,y))) -> do
---                           processPawnUpgrade (blackPlay g) Black g
---                         (_,_) -> do
---                           return g
 
 processPawnUpgrade :: Played -> Player -> GameState -> IO GameState
 processPawnUpgrade (Played move) player g
@@ -243,12 +218,21 @@ modifyBoard (Place c (x,y)) b = (replace2 b
                                          (x,y)
                                          c)
 
-gameOverCheck :: GameState -> Int
-gameOverCheck g
-    | (pieceCount (theBoard g) White Pawn)==0 && (pieceCount (theBoard g) Black Pawn)==0 = 1
-    | (pieceCount (theBoard g) White Pawn)==0 = 2
-    | (pieceCount (theBoard g) Black Pawn)==0 = 3
-    | otherwise = 4
+gameOverCheck :: GameState -> String -> String -> Maybe String
+gameOverCheck g wChooserStr bChooserStr
+    | wPawns==0 && bPawns==0 = Just (gameOverString "Draw!" wPawns bPawns wChooserStr bChooserStr)
+    | wPawns==0 || (whitePen g)==2 = Just (gameOverString "Black wins!" wPawns bPawns wChooserStr bChooserStr)
+    | bPawns==0 || (blackPen g)==2 = Just (gameOverString "White wins!" wPawns bPawns wChooserStr bChooserStr)
+    | (whitePlay g)==Passed && (blackPlay g)==Passed = case (wPawns==bPawns,wPawns>bPawns) of
+                                                        (True,_) -> Just (gameOverString "Draw!" wPawns bPawns wChooserStr bChooserStr)
+                                                        (False,True) -> Just (gameOverString "White wins!" wPawns bPawns wChooserStr bChooserStr)
+                                                        _ -> Just (gameOverString "Black wins!" wPawns bPawns wChooserStr bChooserStr)
+    | otherwise = Nothing
+    where wPawns = pieceCount (theBoard g) White Pawn
+          bPawns = pieceCount (theBoard g) Black Pawn
+
+gameOverString :: String -> Int -> Int -> String -> String -> String
+gameOverString winner wPawns bPawns wChooserStr bChooserStr = winner ++ "   Black (" ++ bChooserStr ++ "): " ++ (show bPawns) ++ "  White (" ++ wChooserStr ++ "): " ++ (show wPawns)
 
 ---2D list utility functions-------------------------------------------------------
 

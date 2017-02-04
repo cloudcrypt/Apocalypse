@@ -25,17 +25,17 @@ printStrategies (x:xs) = do
     putStrLn ("  " ++ (fst x))
     printStrategies xs
 
-validateStrategies  :: [String] -> Maybe (Chooser,Chooser)
+validateStrategies  :: [String] -> Maybe ((String,Chooser),(String,Chooser))
 validateStrategies [a,b] = let s1 = validateStrategy strategies a
                                s2 = validateStrategy strategies b
                            in case (not (isNothing s1),not (isNothing s2)) of
                                 (True, True) -> Just (fromJust s1,fromJust s2)
                                 _ -> Nothing
 
-validateStrategy    :: [(String,Chooser)] -> String -> Maybe Chooser
+validateStrategy    :: [(String,Chooser)] -> String -> Maybe (String,Chooser)
 validateStrategy [] s = Nothing
 validateStrategy (x:xs) s = if (fst x)==s
-                            then Just (snd x)
+                            then Just x
                             else validateStrategy xs s
 
 getStrategies       :: IO [String]
