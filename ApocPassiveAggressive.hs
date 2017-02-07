@@ -8,15 +8,15 @@ import ApocStrategyGreedy
 
 passAgg :: Chooser
 passAgg gs Normal p = do
-        let moves = (filter (killMove g) (validMoves player board))
-        in case (length moves) of
-            0 -> return $ Just Nothing
-            _ -> return $ Just moves !! 0 
+        let moves = (filter (killMove gs) (validMoves p board))
+		in case (length moves) of
+                0 -> return $ Just Nothing
+                _ -> return $ Just moves !! 0 
 
 
 
 killMove :: GameState -> Played -> Bool
-killMove g (Played (src, dst)) = (getFromBoard (theBoard g) dst) \= E
+killMove gs (Played (src, dst)) = (getFromBoard (theBoard gs) dst) /= E
 
 
 		
