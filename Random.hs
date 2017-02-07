@@ -1,0 +1,23 @@
+
+module ApocStrategies (
+        randomChoice
+        ) where
+
+import ApocUtility
+import System.Random
+
+randomChoice :: Chooser
+randomChoice g Normal p = do
+                ranNum <- (randomRIO (0, ((length (validMoves p g)) - 1))
+                (validMoves p g)!!ranNum
+randomChoice g PawnPlacement p = do
+                ranPlace <-(randomRIO(0, (length (ifEmpty 0 0 [] g)))-1))
+                return (ifEmpty 0 0 [] g)!!ranPlace
+
+ 
+ifEmtpy :: Int -> Int -> [(Int,Int)] -> GameState -> [(Int, Int)]
+ifEmpty x 5 z g = ifEmpty (x + 1) 0 z g
+ifEmpty 5 y z g = z
+ifEmpty x y z g | getBoardVal (theBoard g) (x,y) == E = (x,y):z ifEmpty x (y + 1) z g
+                | otherwise = ifEmpty x (y + 1) z g
+
