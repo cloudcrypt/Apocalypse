@@ -32,18 +32,6 @@ applyBestMove Black g = let p = bestMove Black g
 
 bestMove :: Player -> GameState -> Played
 bestMove p g = frt4 $ foldr maxWinFactor (10000,-1000,g,Passed) (expandOutcomes p (possibleOutcomes p g 0))
-   -- possibles <- mapM (cumulativeWinFactor p) (possibleOutcomes p g 0)
-   -- case isIdentical (snd4 (possibles !! 0)) (map snd4 possibles) of
-   --  False -> do return (frt4 (foldr minMoves (1000,-1000,g,Passed) possibles))
-   --  True -> do
-   --      n <- randomRIO (0,(length possibles) - 1)
-   --      return (frt4 (possibles !! n))
-
--- bestMove :: PLayer -> GameState -> Played
--- bestMove p g = let possibles = possibleOutcomes p g
---                in case isIdentical (snd4 (possibles !! 0)) (map snd4 possibles) of
---                 False -> return (frt4 foldr maxWinFactor (1000,-1000,g,Passed) possibles)
---                 True -> 
 
 expandOutcomes :: (Fractional n, Eq n, Ord n) => Player -> [(Int,n,GameState,Played)] -> [(Int,n,GameState,Played)]
 expandOutcomes player outcomes = case ((length outcomes)>1 && (isIdentical (snd4 (outcomes !! 0)) (map snd4 outcomes))) of 
@@ -52,28 +40,6 @@ expandOutcomes player outcomes = case ((length outcomes)>1 && (isIdentical (snd4
 
 expandOutcome :: (Fractional n, Eq n, Ord n) => Player -> (Int,n,GameState,Played) -> [(Int,n,GameState,Played)]
 expandOutcome player (_,n,g,played) = map (\(newMoves,newWinFactor,newG,_) -> (newMoves,newWinFactor,newG,played)) (possibleOutcomes player g n)
-
-
--- cumulativeWinFactor :: (Fractional n, Eq n, Ord n) => Player -> (Int,n,GameState,Played) -> IO (Int,n,GameState,Played)
--- cumulativeWinFactor player (moves,w,g,played) = case ((length (validMoves player g))>0 && (pieceCount (theBoard g) (otherPlayer player) Pawn)>0) of
---                                             False -> return (moves,w,g,played)
---                                             True -> do
---                                                 (_,newW,newG,_) <- bestOutcome player g
---                                                 cumulativeWinFactor player (moves+1,w+newW,newG,played)
---     --                                       in case ((pieceCount (theBoard g) player Pawn)==0 || (pieceCount (theBoard g) (otherPlayer player) Pawn)==0)
---     --                                       (cumulativeWinFactor player (w + newW, newG, played))
---     -- | otherwise = (w,g,played)
---     -- where done = ((pieceCount (theBoard g) player Pawn)==0 || (pieceCount (theBoard g) (otherPlayer player) Pawn)==0)
-
---bestOutcome :: (Fractional n, Eq n, Ord n) => Player -> GameState -> (n,GameState,Played)
---bestOutcome p g = (foldr maxWinFactor (-100,g,Passed) (possibleWinFactors p g))
--- bestOutcome :: (Fractional n, Eq n, Ord n) => Player -> GameState -> IO (Int,n,GameState,Played)
--- bestOutcome p g = let possibles = possibleOutcomes p g 0
---                    in case isIdentical (fst4 (possibles !! 0)) (map fst4 possibles) of
---                     False -> do return (foldr maxWinFactor (1000,-1000,g,Passed) possibles)
---                     True -> do
---                         n <- randomRIO (0,(length possibles) - 1)
---                         return (possibles !! n)
 
 minMoves :: (Fractional n, Eq n, Ord n) => (Int,n,GameState,Played) -> (Int,n,GameState,Played) -> (Int,n,GameState,Played)
 minMoves (m1,w1,g1,p1) (m2,w2,g2,p2) = case (m1==m2,m1<m2) of
