@@ -123,6 +123,12 @@ instance {-# OVERLAPS #-} Show Board where show b = board2Str b
 
 -- | The intial state of the board
 initBoard       :: GameState
+-- initBoard       = GameState Init 0 Init 0
+--                   [ [E, E , E , E , E],
+--                     [E, E , E , E , WP],
+--                     [E, E , E , E , E],
+--                     [E, E , E , E , BP],
+--                     [E, E , E , E , E] ]
 initBoard       = GameState Init 0 Init 0
                   [ [WK, WP, WP, WP, WK],
                     [WP, E , E , E , WP],

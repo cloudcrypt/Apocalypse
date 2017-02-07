@@ -8,6 +8,13 @@ module ApocUtility (
     pieceCount,
     seperate,
     ranger,
+    isSet,
+    isIdentical,
+    singleMax,
+    fst4,
+    snd4,
+    thd4,
+    frt4,
     verifyMoveLegality,
     addModifications,
     BoardModification(Move,Delete,Place),
@@ -63,6 +70,41 @@ ranger (x:xs) =
     if x < 5 && x >= 0
        then ranger xs
        else False   
+
+{- | Takes a list of arbitrary type (of class Eq) and returns True if it is a set
+     (contains no duplicates) and False if it contains duplicates.
+-}
+isSet :: Eq a => [a] -> Bool
+isSet s = (length s) == length (toSet s)
+
+{- | Takes a list of arbitrary type (of class Eq) and returns a set (a list without
+     any duplicates, order doesn't matter).
+-}
+toSet                    :: Eq a => [a] -> [a]
+toSet []                 = []
+toSet (x:xs) | elem x xs = toSet xs
+toSet (x:xs)             = x:toSet xs
+
+isIdentical :: Eq a => a -> [a] -> Bool
+isIdentical a [] = True
+isIdentical a (x:xs) = case a==x of
+                        True -> isIdentical a xs
+                        False -> False
+
+singleMax :: (Eq a, Ord a) => [a] -> Bool
+singleMax xs = (length $ filter (==(maximum xs)) xs)==1                    
+
+fst4 :: (a,b,c,d) -> a
+fst4 (a,b,c,d) = a
+
+snd4 :: (a,b,c,d) -> b
+snd4 (a,b,c,d) = b
+
+thd4 :: (a,b,c,d) -> c
+thd4 (a,b,c,d) = c
+
+frt4 :: (a,b,c,d) -> d
+frt4 (a,b,c,d) = d
 
 verifyMoveLegality  :: [(Int, Int)] -> Player -> GameState -> (Played, Int)
 verifyMoveLegality move p g = let (x1,y1) = (move !! 0)
