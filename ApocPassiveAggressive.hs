@@ -1,19 +1,22 @@
 --ApocPassiveAggressive.hs
 
-module ApocPassiveAggressive where
+module ApocPassiveAggressive(
+	passAgg
+	) where
 
 import ApocTools
 import ApocUtility
-import ApocStrategyGreedy
 
 passAgg :: Chooser
 passAgg gs Normal p = do
-        let moves = (filter (killMove gs) (validMoves p board))
-		in case (length moves) of
-                0 -> return $ Just Nothing
-                _ -> return $ Just moves !! 0 
+    let moves = (filter (killMove gs) (validMoves p gs))
+	in case (length moves) of
+        0 -> return $ Nothing
+        _ -> return $ Just (blah (moves !! 0))
+passAgg gs PawnPlacement p = return Nothing
 
-
+blah :: Played -> [(Int,Int)]
+blah (Played (src,dst)) = [src,dst]
 
 killMove :: GameState -> Played -> Bool
 killMove gs (Played (src, dst)) = (getFromBoard (theBoard gs) dst) /= E

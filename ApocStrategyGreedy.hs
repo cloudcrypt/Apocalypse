@@ -3,7 +3,7 @@ module ApocStrategyGreedy(
     greedy
     ) where
 
---import System.Random
+import System.Random
 import ApocTools
 import ApocUtility
 
@@ -16,8 +16,10 @@ greedy g PawnPlacement p = return Nothing
 getGreedyChoice :: Played -> [(Int,Int)]
 getGreedyChoice (Played (src,dst)) = [src,dst]
 
-optimalMove :: Player -> GameState -> Played
-optimalMove p g = frt4 $ foldr minMoves (1000,-1000,g,Passed) (map (neededMoves p) (possibleOutcomes p g 0))
+--optimalMove :: Player -> GameState -> Played
+--optimalMove p g = let moves = foldr minMoves (1000,-1000,g,Passed) (map (neededMoves p) (possibleOutcomes p g 0))
+--                  filter (\(n,_,_,_) -> n==(minimum (map fst4 moves))) moves
+--  frt4 $ foldr minMoves (1000,-1000,g,Passed) (map (neededMoves p) (possibleOutcomes p g 0))
 
 neededMoves :: (Fractional n, Eq n, Ord n) => Player -> (Int,n,GameState,Played) -> (Int,n,GameState,Played)
 neededMoves player (moves,winF,g,played) = case ((length (validMoves player g))>0 && (pieceCount (theBoard g) (otherPlayer player) Pawn)>0) of
@@ -61,29 +63,6 @@ possibleOutcome White g n played = let newState = modifyGameState ((played,0),(P
                                    in (1,n+(winFactor White newState),newState,played)
 possibleOutcome Black g n played = let newState = modifyGameState ((Passed,0),(played,0),(addModifications played Passed g)) g
                                    in (1,n+(winFactor Black newState),newState,played)
-
-validMoves :: Player -> GameState -> [Played]
-validMoves p g = map fst (filter validMove (map (\x -> verifyMoveLegality x p g) (possibleMoves p g)))
-
-validMove :: (Played,Int) -> Bool
-validMove (Played _,_) = True
-validMove (_,_) = False
-
-possibleMoves :: Player -> GameState -> [[(Int,Int)]]
-possibleMoves p g = foldr (++) [] (map moves (playerCells p g))
-
-moves :: (Int,Int) -> [[(Int,Int)]]
-moves src = foldr (++) [] (map (\x -> map (\y -> [src,(x,y)]) [0..4]) [0..4])
-
-cells :: [(Int,Int)]
-cells = foldr (++) [] (map (\x -> map (\y -> (x,y)) [0..4]) [0..4])
-
-playerCells :: Player -> GameState -> [(Int,Int)]
-playerCells p g = filter (playerCell p g) cells
-
-playerCell :: Player -> GameState -> (Int,Int) -> Bool
-playerCell p g coord = let cell = getFromBoard (theBoard g) coord
-                       in (cell/=E && (playerOf (pieceOf cell))==p)
 
 winFactor :: (Fractional n) => Player -> GameState -> n
 winFactor p g = let b = theBoard g

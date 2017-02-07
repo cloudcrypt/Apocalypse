@@ -11,9 +11,10 @@ import Data.Char (toUpper)
 import ApocTools
 import ApocStrategyHuman
 import ApocStrategyGreedy
+import ApocPassiveAggressive
 
 strategies  :: [(String,Chooser)]
-strategies = [("human",human),("greedy",greedy)]
+strategies = [("human",human),("greedy",greedy),("passAgg",passAgg)]
 
 displayStrategies :: IO ()
 displayStrategies = do 
