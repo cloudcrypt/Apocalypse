@@ -19,7 +19,8 @@ module ApocUtility (
     addModifications,
     BoardModification(Move,Delete,Place),
     modifyGameState,
-    validMoves
+    validMoves,
+    cells
     ) where
 
 import ApocTools

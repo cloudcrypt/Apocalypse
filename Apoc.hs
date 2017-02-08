@@ -71,26 +71,26 @@ processTurn g (bChooser,wChooser) = do
     Nothing -> do
       black <- (snd bChooser) g Normal Black
       white <- (snd wChooser) g Normal White
-      newState <- verifyPawnUpgrade $ performMoves white black g
+      newState <- verifyPawnUpgrade (performMoves white black g) (snd wChooser) (snd bChooser)
       processTurn newState (bChooser,wChooser)
 
-verifyPawnUpgrade  :: GameState -> IO GameState
-verifyPawnUpgrade g = do
-  state <- processPawnUpgrade (whitePlay g) White g
-  processPawnUpgrade (blackPlay g) Black state
+verifyPawnUpgrade  :: GameState -> Chooser -> Chooser -> IO GameState
+verifyPawnUpgrade g wChooser bChooser = do
+  state <- processPawnUpgrade (whitePlay g) White g wChooser bChooser
+  processPawnUpgrade (blackPlay g) Black state wChooser bChooser
 
-processPawnUpgrade :: Played -> Player -> GameState -> IO GameState
-processPawnUpgrade (Played move) player g
+processPawnUpgrade :: Played -> Player -> GameState -> Chooser -> Chooser -> IO GameState
+processPawnUpgrade (Played move) player g wChooser bChooser
   | (upgradeableMove (Played move) player g) = do
     putStrLn (show g)
     case (pieceCount (theBoard g) player Knight)<2 of
       True -> return $ performPawnUpgrade player (Played move) g
       False -> do
-        placeMove <- human g PawnPlacement player
+        placeMove <- (if player==White then wChooser else bChooser) g PawnPlacement player
         return $ performPawnPlace placeMove (snd move) player g
   | otherwise = do
     return g
-processPawnUpgrade _ _ g = do return g
+processPawnUpgrade _ _ g _ _ = do return g
 
 performPawnUpgrade :: Player -> Played -> GameState -> GameState
 performPawnUpgrade White (Played (_,(x2,y2))) g = let wPlay = UpgradedPawn2Knight (x2,y2)

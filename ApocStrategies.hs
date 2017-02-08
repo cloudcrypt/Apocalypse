@@ -12,9 +12,10 @@ import ApocTools
 import ApocStrategyHuman
 import ApocStrategyGreedy
 import ApocPassiveAggressive
+import Random
 
 strategies  :: [(String,Chooser)]
-strategies = [("human",human),("greedy",greedy),("passAgg",passAgg)]
+strategies = [("human",human),("greedy",greedy),("passAgg",passAgg),("random",randomChoice)]
 
 displayStrategies :: IO ()
 displayStrategies = do 
