@@ -9,16 +9,20 @@ import ApocUtility
 
 greedy   :: Chooser
 greedy g Normal p = do
-    let m = bestMove p g
+    m <- optimalMove p g
     return (Just (getGreedyChoice m))
 greedy g PawnPlacement p = return Nothing
 
 getGreedyChoice :: Played -> [(Int,Int)]
 getGreedyChoice (Played (src,dst)) = [src,dst]
 
---optimalMove :: Player -> GameState -> Played
---optimalMove p g = let moves = foldr minMoves (1000,-1000,g,Passed) (map (neededMoves p) (possibleOutcomes p g 0))
---                  filter (\(n,_,_,_) -> n==(minimum (map fst4 moves))) moves
+optimalMove :: Player -> GameState -> IO Played
+optimalMove p g = do
+    let moves = map (neededMoves p) (possibleOutcomes p g 0)
+    let optimalMove = minimum (map fst4 moves)
+    let optimalMoves = filter (\(n,_,_,_) -> n==optimalMove) moves
+    randNum <- (randomRIO (0, ((length optimalMoves) - 1)))
+    return $ frt4 (optimalMoves !! randNum)
 --  frt4 $ foldr minMoves (1000,-1000,g,Passed) (map (neededMoves p) (possibleOutcomes p g 0))
 
 neededMoves :: (Fractional n, Eq n, Ord n) => Player -> (Int,n,GameState,Played) -> (Int,n,GameState,Played)
