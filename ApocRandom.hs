@@ -7,6 +7,8 @@ import ApocUtility
 import ApocTools
 import System.Random
 
+-- |This generates random numbers.
+
 randomChoice :: Chooser
 randomChoice g Normal p = do
                 let moves = validMoves p g
@@ -20,6 +22,7 @@ randomChoice g PawnPlacement p = do
                 return (Just [(cells !! ranNum)])
                 -- ranPlace <- (randomRIO(0, (length (ifEmpty 0 0 [] g)))-1)
                 -- return Just ((ifEmpty 0 0 [] g) !! ranPlace)
+
 
 blah :: Played -> [(Int,Int)]
 blah (Played (src,dst)) = [src,dst]
