@@ -1,5 +1,5 @@
 
-module Random (
+module ApocRandom (
         randomChoice
         ) where
 
