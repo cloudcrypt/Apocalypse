@@ -6,6 +6,11 @@ License: None (Assignment)
 Portability: ghc 7.10.3 , Needs Cabal
 -}
 
+{- |
+This class is a passive aggressive strategy. The AI will pass if there are no available kill moves within 
+the reach of its pieces. It will calculate all the possible moves at the start and will filter out the moves
+that will be kill moves. It will then check if there are kill moves. If not it will pass.
+-}
 module ApocPassiveAggressive(
 	passAgg
 	) where
@@ -13,6 +18,7 @@ module ApocPassiveAggressive(
 import ApocTools
 import ApocUtility
 import System.Random
+
 
 {- |This method will first filter out the killmoves and valid moves from the user
 sepcified board. It will then check the length of the list and if the list is empty
@@ -33,11 +39,8 @@ blah :: Played -> [(Int,Int)] -- ^This method is used to convert a Played type i
 blah (Played (src,dst)) = [src,dst] 
 
 
-{- | This function will look through the defined board and will check if the value is
-an empty character. If the character is empty it will return a boolean true.
--}
-killMove :: GameState -> Played -> Bool
-killMove gs (Played (src, dst)) = (getFromBoard (theBoard gs) dst) /= E
+killMove :: GameState -> Played -> Bool --This function will look through the defined board and will check if the value is an empty character. 
+killMove gs (Played (src, dst)) = (getFromBoard (theBoard gs) dst) /= E --If the character is empty it will return a boolean true.
 
 
 
