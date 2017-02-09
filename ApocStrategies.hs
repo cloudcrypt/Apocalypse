@@ -1,4 +1,10 @@
-
+{- |
+Module: ApocStrategies.hs
+Description: Cpsc449 W2017 - Group 24 
+Copyright: (c) Daniel Dastoor, James Gilders, Carlin Liu, Teresa Van, Thomas Vu
+License: None (Assignment)
+Portability: ghc 7.10.3 , Needs Cabal
+-}
 module ApocStrategies(
     strategies,
     displayStrategies,
@@ -13,9 +19,10 @@ import ApocStrategyHuman
 import ApocStrategyGreedy
 import ApocPassiveAggressive
 import ApocRandom
+import ApocJoke
 
 strategies  :: [(String,Chooser)]
-strategies = [("human",human),("greedy",greedy),("passAgg",passAgg),("random",randomChoice)]
+strategies = [("human",human),("greedy",greedy),("passAgg",passAgg),("random",randomChoice),("ApocJoke",joke)]
 
 displayStrategies :: IO ()
 displayStrategies = do 
