@@ -47,15 +47,21 @@ samePlayer cell1 cell2  = case ((cell1==E) || (cell2==E)) of
 
 otherPlayer     :: Player -> Player
 otherPlayer White = Black
-otherPlayer Black = White                          
+otherPlayer Black = White                  
+
+-- | Deals with the upgrading of pawns pattern matched, for each player
 
 upgradeableMove :: Played -> Player -> GameState -> Bool
 upgradeableMove (Played (_,(x2,y2))) White g = ((getFromBoard (theBoard g) (x2,y2))==WP && y2==4)
 upgradeableMove (Played (_,(x2,y2))) Black g = ((getFromBoard (theBoard g) (x2,y2))==BP && y2==0)
 
+-- | calculates the number of pawns for each player
+
 pieceCount     :: Board -> Player -> PieceType -> Int
 pieceCount [] _ _ = 0
 pieceCount (x:xs) p pt = (pieceCountRow x p pt) + (pieceCount xs p pt)
+
+-- | calculates the number of pieces in each row and returns that as an int
 
 pieceCountRow  :: [Cell] -> Player -> PieceType -> Int
 pieceCountRow [] _ _ = 0
@@ -63,6 +69,8 @@ pieceCountRow (E:xs) p pt = pieceCountRow xs p pt
 pieceCountRow (x:xs) p pt = if ((playerOf (pieceOf x))==p && (pieceTypeOf x)==pt)
                             then 1 + (pieceCountRow xs p pt)
                             else pieceCountRow xs p pt
+                            
+-- | Takes a character array and determins if the value is a number, if so it puts it into a new array
 
 seperate :: [Char] -> [Int] -> [Int]
 seperate [] y = reverse y
@@ -71,6 +79,8 @@ seperate (x:xs) y =
        then seperate xs ((digitToInt(x)):y)
        else
           seperate xs y
+          
+-- | Takes an array and determins if it is inside of the board size USED FOR IO
 
 ranger :: [Int] -> Bool
 ranger [] = True
@@ -93,11 +103,15 @@ toSet []                 = []
 toSet (x:xs) | elem x xs = toSet xs
 toSet (x:xs)             = x:toSet xs
 
+-- | Determins if an item is an element within an array
+
 isIdentical :: Eq a => a -> [a] -> Bool
 isIdentical a [] = True
 isIdentical a (x:xs) = case a==x of
                         True -> isIdentical a xs
                         False -> False
+                        
+-- | Finds the largest element of an anrray
 
 singleMax :: (Eq a, Ord a) => [a] -> Bool
 singleMax xs = (length $ filter (==(maximum xs)) xs)==1                    
@@ -114,6 +128,9 @@ thd4 (a,b,c,d) = c
 frt4 :: (a,b,c,d) -> d
 frt4 (a,b,c,d) = d
 
+{- | Takes in a move and a player and a game state and returns if the move is valid in the form of of a played and a int 
+ representing a invalid move and penalty 
+-}
 verifyMoveLegality  :: [(Int, Int)] -> Player -> GameState -> (Played, Int)
 verifyMoveLegality move p g = let (x1,y1) = (move !! 0)
                                   (x2,y2) = (move !! 1)
@@ -125,6 +142,10 @@ verifyMoveLegality move p g = let (x1,y1) = (move !! 0)
                                 False -> if (verifyPieceDest (pieceTypeOf cell1) cell1 cell2 (x1,y1) (x2,y2))
                                          then ((Played ((x1,y1), (x2,y2))), 0)
                                          else ((Goofed ((x1,y1), (x2,y2))), 1)
+                                         
+{- Takes in the piece type and two cells representing the destination of the piece as well as the source
+coordinates and based on the piece type will make the piece move to the new location.
+-}
 
 verifyPieceDest   :: PieceType -> Cell -> Cell -> (Int, Int) -> (Int, Int) -> Bool
 verifyPieceDest Knight _ dstCell (x1,y1) (x2,y2) = let columnDiff = abs (x2 - x1)
@@ -140,6 +161,10 @@ verifyPieceDest Pawn BP dstCell (x1,y1) (x2,y2) = if y2==(y1-1)
                                                        then dstCell==E
                                                        else (((abs (x2-x1))==1) && ((dstCell==WP) || (dstCell==WK)))
                                                   else False  
+                                                  
+{- takes in the two moves of the two players in the form of two played types, and then the current game state
+and then returns an array of the modified board.
+-}
 
 addModifications     :: Played -> Played -> GameState -> [BoardModification]
 addModifications (Played ((ax1,ay1),(ax2,ay2))) (Played ((bx1,by1),(bx2,by2))) g = let cellA = getFromBoard (theBoard g) (ax1,ay1)
@@ -165,6 +190,10 @@ addModifications (PlacedPawn ((x1,y1),(x2,y2))) None g = let player = playerOf (
                                                               Black -> [Place BP (x2,y2)]                                                                                                             
 addModifications _ _ g = []  
 
+{- takes in the played moves from both players and the board modification array and the old game state and returns 
+the modified board with the penalties calculated.
+-}
+
 modifyGameState :: ((Played, Int), (Played, Int), [BoardModification]) -> GameState -> GameState
 modifyGameState ((wPlay, wPenalty), (bPlay, bPenalty), mods) g = 
   GameState (bPlay)
@@ -172,14 +201,22 @@ modifyGameState ((wPlay, wPenalty), (bPlay, bPenalty), mods) g =
          (wPlay)
          ((whitePen g) + wPenalty)
          (applyBoardModifications mods (theBoard g))
+         
+{-data type board modification is a list of one of three types, a move, which represents the destination and source 
+delete which takes the coordinates of the location to delete and place cell which contains the coordinates of a placement
+-}
 
 data BoardModification = Move (Int, Int) (Int, Int)
                        | Delete (Int, Int)
                        | Place Cell (Int, Int)
+                       
+-- | apply board modifications takes in an array of board modifications and then the current board and then returns the updated board
 
 applyBoardModifications   :: [BoardModification] -> Board -> Board
 applyBoardModifications [] b = b
 applyBoardModifications (x:xs) b = applyBoardModifications xs (modifyBoard x b)
+
+-- | Is the actual act of instantianting the specific changes to the board by taking in the board and the board modifications
 
 modifyBoard   :: BoardModification -> Board -> Board
 modifyBoard (Move (x1,y1) (x2,y2)) b = (replace2 (replace2 b
@@ -196,24 +233,40 @@ modifyBoard (Place c (x,y)) b = (replace2 b
 
 --AI Utilty function---------------------------------------------------------------
 
+
+{- Takes in the player and the game state as well as an array of played moves and calls the apropriate functions to obtain a list
+of all valid moves
+-}
 validMoves :: Player -> GameState -> [Played]
 validMoves p g = map fst (filter validMove (map (\x -> verifyMoveLegality x p g) (possibleMoves p g)))
+
+-- | determines if any particular pair of possibble moves is vaild
 
 validMove :: (Played,Int) -> Bool
 validMove (Played _,_) = True
 validMove (_,_) = False
 
+-- | Creates an array of all possible moves but does not account for collisions.
+
 possibleMoves :: Player -> GameState -> [[(Int,Int)]]
 possibleMoves p g = foldr (++) [] (map moves (playerCells p g))
+
+-- | This creates every possible moves without regard for peice type
 
 moves :: (Int,Int) -> [[(Int,Int)]]
 moves src = foldr (++) [] (map (\x -> map (\y -> [src,(x,y)]) [0..4]) [0..4])
 
+-- | creates an array of all cells
+
 cells :: [(Int,Int)]
 cells = foldr (++) [] (map (\x -> map (\y -> (x,y)) [0..4]) [0..4])
 
+-- | Determins which cells are occupied by each player
+
 playerCells :: Player -> GameState -> [(Int,Int)]
 playerCells p g = filter (playerCell p g) cells
+
+-- | checks if a specific cell belongs to a player
 
 playerCell :: Player -> GameState -> (Int,Int) -> Bool
 playerCell p g coord = let cell = getFromBoard (theBoard g) coord
