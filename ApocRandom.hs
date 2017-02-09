@@ -1,5 +1,9 @@
 {- |
-
+Module: ApocRandom.hs
+Description: Cpsc449 W2017 - Group 24 
+Copyright: (c) Daniel Dastoor, James Gilders, Carlin Liu, Teresa Van, Thomas Vu
+License: None (Assignment)
+Portability: ghc 7.10.3 , Needs Cabal
 -}
 module ApocRandom (
         randomChoice
@@ -31,4 +35,4 @@ blah (Played (src,dst)) = [src,dst]
 -- | Gets the empty cells so that the pawn placement can happen in a random location
 
 emptyCells :: GameState -> [(Int,Int)]
-emptyCells g = filter (\x -> (getFromBoard (theBoard g) x)==E) cells                    
+emptyCells g = filter (\x -> (getFromBoard (theBoard g) x)==E) cells
