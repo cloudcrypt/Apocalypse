@@ -1,4 +1,10 @@
-
+{- |
+Module: ApocStrategyGreedy.hs
+Description: Cpsc449 W2017 - Group 24 
+Copyright: (c) Daniel Dastoor, James Gilders, Carlin Liu, Teresa Van, Thomas Vu
+License: None (Assignment)
+Portability: ghc 7.10.3 , Needs Cabal
+-}
 module ApocStrategyGreedy(
     greedy
     ) where
