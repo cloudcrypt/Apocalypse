@@ -5,6 +5,8 @@ Copyright: (c) Daniel Dastoor, James Gilders, Carlin Liu, Teresa Van, Thomas Vu
 License: None (Assignment)
 Portability: ghc 7.10.3 , Needs Cabal
 -}
+
+-- | This is a strategy that generates a completely random move 
 module ApocRandom (
         randomChoice
         ) where
