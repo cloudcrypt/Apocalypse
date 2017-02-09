@@ -1,4 +1,10 @@
---ApocPassiveAggressive.hs
+{- |
+Module: ApocPassiveAggressive.hs
+Description: Cpsc449 W2017 - Group 24 
+Copyright: (c) Daniel Dastoor, James Gilders, Carlin Liu, Teresa Van, Thomas Vu
+License: None (Assignment)
+Portability: ghc 7.10.3 , Needs Cabal
+-}
 
 module ApocPassiveAggressive(
 	passAgg
@@ -22,10 +28,9 @@ passAgg gs Normal p = do
         _ -> return $ Just (blah (moves !! ranNum))
 passAgg gs PawnPlacement p = return Nothing
 
-{- |This method is used to convert a Played type into a touple
--}
-blah :: Played -> [(Int,Int)]
-blah (Played (src,dst)) = [src,dst]
+
+blah :: Played -> [(Int,Int)] -- ^This method is used to convert a Played type into a touple
+blah (Played (src,dst)) = [src,dst] 
 
 
 {- | This function will look through the defined board and will check if the value is
