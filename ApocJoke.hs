@@ -1,4 +1,8 @@
 --ApocJoke.hs
+{- |
+
+-}
+
 
 module ApocPassiveAggressive(
 	joke
