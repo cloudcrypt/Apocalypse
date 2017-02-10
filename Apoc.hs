@@ -146,6 +146,11 @@ verifyPawnPlaceLegality (xy1:xy2:_) g = case (getFromBoard (theBoard g) xy2) of
                                     E -> ((PlacedPawn (xy1,xy2)), 0)
                                     _ -> ((BadPlacedPawn (xy1,xy2)), 1)                                                                           
 
+
+{- |This function will check if the end game state has been reached. It will first check if there is a draw by the number of
+pawns of both teams ==0. Then it will check either white or black for penalties and then compare the number of pawns of the
+black and white teams and if it is zero, it will call the gameoverstring method.
+-}
 gameOverCheck :: GameState -> String -> String -> Maybe String
 gameOverCheck g wChooserStr bChooserStr
     | wPawns==0 && bPawns==0 = Just (gameOverString "Draw!" wPawns bPawns wChooserStr bChooserStr)
@@ -158,6 +163,7 @@ gameOverCheck g wChooserStr bChooserStr
     | otherwise = Nothing
     where wPawns = pieceCount (theBoard g) White Pawn
           bPawns = pieceCount (theBoard g) Black Pawn
+
 
 -- |This method will display the end game string along with the strategies chosen and number of pawns remaining.
 gameOverString :: String -> Int -> Int -> String -> String -> String
