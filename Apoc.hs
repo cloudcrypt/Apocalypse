@@ -92,6 +92,10 @@ processPawnUpgrade (Played move) player g wChooser bChooser
     return g
 processPawnUpgrade _ _ g _ _ = do return g
 
+
+{- |This function will take in a player, a move and a gamestate. It will process the white and black players separately. It will 
+call the upgradePawn2Knight method on the specified location and will then return the new modified gamestate.
+-}
 performPawnUpgrade :: Player -> Played -> GameState -> GameState
 performPawnUpgrade White (Played (_,(x2,y2))) g = let wPlay = UpgradedPawn2Knight (x2,y2)
                                                       bPlay = None
@@ -100,6 +104,10 @@ performPawnUpgrade Black (Played (_,(x2,y2))) g = let wPlay = None
                                                       bPlay = UpgradedPawn2Knight (x2,y2)
                                                   in modifyGameState ((wPlay,0),(bPlay,0),(addModifications bPlay wPlay g)) g
 
+
+{- |This function will take in a src and destination of a move along with the player and gamestate. It will then call the 
+modifyGameState function after it verifies the move location.
+-}
 performPawnPlace  :: Maybe [(Int,Int)] -> (Int,Int) -> Player -> GameState -> GameState
 performPawnPlace move src p g = modifyGameState (verifyPawnPlace move src p g) g
 
@@ -151,5 +159,6 @@ gameOverCheck g wChooserStr bChooserStr
     where wPawns = pieceCount (theBoard g) White Pawn
           bPawns = pieceCount (theBoard g) Black Pawn
 
+-- |This method will display the end game string along with the strategies chosen and number of pawns remaining.
 gameOverString :: String -> Int -> Int -> String -> String -> String
 gameOverString winner wPawns bPawns wChooserStr bChooserStr = winner ++ "   Black (" ++ bChooserStr ++ "): " ++ (show bPawns) ++ "  White (" ++ wChooserStr ++ "): " ++ (show wPawns)
