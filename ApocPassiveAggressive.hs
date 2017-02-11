@@ -12,8 +12,8 @@ the reach of its pieces. It will calculate all the possible moves at the start a
 that will be kill moves. It will then check if there are kill moves. If not it will pass.
 -}
 module ApocPassiveAggressive(
-	passAgg
-	) where
+    passAgg
+    ) where
 
 import ApocTools
 import ApocUtility
@@ -26,12 +26,12 @@ sepcified board. It will then check the length of the list and if the list is em
 a touple and will return. For pawnplacement, nothing is returned.
 -}
 passAgg :: Chooser
-passAgg gs Normal p = do
-    let moves = (filter (killMove gs) (validMoves p gs))
-    let ranNum <- randomRIO(0, ((length moves) -1))
-	in case (length moves) of
-        0 -> return $ Nothing
-        _ -> return $ Just (blah (moves !! ranNum))
+passAgg gs Normal p = let moves = (filter (killMove gs) (validMoves p gs))
+                      in case (length moves) of
+                        0 -> do return $ Nothing
+                        _ -> do
+                            ranNum <- randomRIO(0, ((length moves) -1))
+                            return $ Just (blah (moves !! ranNum))
 passAgg gs PawnPlacement p = return Nothing
 
 

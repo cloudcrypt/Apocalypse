@@ -4,7 +4,7 @@
 -}
 
 
-module ApocPassiveAggressive(
+module ApocJoke (
 	joke
 	) where
 
