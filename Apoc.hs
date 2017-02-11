@@ -32,7 +32,6 @@ import System.IO.Unsafe
 import ApocTools
 import ApocUtility
 import ApocStrategies
-import ApocStrategyHuman
 
 
 ---Main-------------------------------------------------------------

@@ -5,7 +5,7 @@ Copyright: (c) Daniel Dastoor, James Gilders, Carlin Liu, Teresa Van, Thomas Vu
 License: None (Assignment)
 Portability: ghc 7.10.3 , Needs Cabal
 -}
-module ApocStrategyGreedy(
+module ApocStrategyGreedy (
     greedy
     ) where
 
