@@ -12,11 +12,7 @@ module ApocUtility (
     otherPlayer,
     upgradeableMove,
     pieceCount,
-    seperate,
-    ranger,
-    isSet,
     isIdentical,
-    singleMax,
     fst4,
     snd4,
     thd4,
@@ -68,40 +64,7 @@ pieceCountRow [] _ _ = 0
 pieceCountRow (E:xs) p pt = pieceCountRow xs p pt
 pieceCountRow (x:xs) p pt = if ((playerOf (pieceOf x))==p && (pieceTypeOf x)==pt)
                             then 1 + (pieceCountRow xs p pt)
-                            else pieceCountRow xs p pt
-                            
--- | Takes a character array and determins if the value is a number, if so it puts it into a new array
-
-seperate :: [Char] -> [Int] -> [Int]
-seperate [] y = reverse y
-seperate (x:xs) y = 
-    if isDigit x == True
-       then seperate xs ((digitToInt(x)):y)
-       else
-          seperate xs y
-          
--- | Takes an array and determins if it is inside of the board size USED FOR IO
-
-ranger :: [Int] -> Bool
-ranger [] = True
-ranger (x:xs) = 
-    if x < 5 && x >= 0
-       then ranger xs
-       else False   
-
-{- | Takes a list of arbitrary type (of class Eq) and returns True if it is a set
-     (contains no duplicates) and False if it contains duplicates.
--}
-isSet :: Eq a => [a] -> Bool
-isSet s = (length s) == length (toSet s)
-
-{- | Takes a list of arbitrary type (of class Eq) and returns a set (a list without
-     any duplicates, order doesn't matter).
--}
-toSet                    :: Eq a => [a] -> [a]
-toSet []                 = []
-toSet (x:xs) | elem x xs = toSet xs
-toSet (x:xs)             = x:toSet xs
+                            else pieceCountRow xs p pt 
 
 -- | Determins if an item is an element within an array
 
@@ -109,12 +72,7 @@ isIdentical :: Eq a => a -> [a] -> Bool
 isIdentical a [] = True
 isIdentical a (x:xs) = case a==x of
                         True -> isIdentical a xs
-                        False -> False
-                        
--- | Finds the largest element of an anrray
-
-singleMax :: (Eq a, Ord a) => [a] -> Bool
-singleMax xs = (length $ filter (==(maximum xs)) xs)==1                    
+                        False -> False                   
 
 fst4 :: (a,b,c,d) -> a
 fst4 (a,b,c,d) = a
