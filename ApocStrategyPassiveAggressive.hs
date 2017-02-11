@@ -40,14 +40,3 @@ passAgg gs PawnPlacement p = do -- Find all of the empty cells on the board and 
 
 killMove :: GameState -> Played -> Bool --This function will look through the defined board and will check if the value is an empty character. 
 killMove gs (Played (src, dst)) = (getFromBoard (theBoard gs) dst) /= E --If the character is empty it will return a boolean true.
-
-
-
--- | Gets the empty cells so that the pawn placement can happen in a random location
-emptyCells :: GameState -> [(Int,Int)]
-emptyCells gs = filter (\x -> (getFromBoard (theBoard gs) x)==E) cells
-
-
-
-
-

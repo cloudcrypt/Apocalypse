@@ -23,7 +23,8 @@ module ApocUtility (
     BoardModification(Move,Delete,Place),
     modifyGameState,
     validMoves,
-    cells
+    cells,
+    emptyCells
     ) where
 
 import ApocTools
@@ -233,6 +234,10 @@ playerCells p g = filter (playerCell p g) cells
 playerCell :: Player -> GameState -> (Int,Int) -> Bool
 playerCell p g coord = let cell = getFromBoard (theBoard g) coord
                        in (cell/=E && (playerOf (pieceOf cell))==p)
+
+-- | Gets the empty cells so that the pawn placement can happen in a random location
+emptyCells :: GameState -> [(Int,Int)]
+emptyCells g = filter (\x -> (getFromBoard (theBoard g) x)==E) cells                       
 
 ---2D list utility functions-------------------------------------------------------
 

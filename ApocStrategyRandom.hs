@@ -28,8 +28,3 @@ randomChoice g PawnPlacement p = do
                 let cells = emptyCells g
                 ranNum <- (randomRIO (0, ((length cells) - 1)))
                 return (Just [(cells !! ranNum)])
-
--- | Gets the empty cells so that the pawn placement can happen in a random location
-
-emptyCells :: GameState -> [(Int,Int)]
-emptyCells g = filter (\x -> (getFromBoard (theBoard g) x)==E) cells

@@ -65,11 +65,18 @@ maxWinFactor (m1,w1,g1,p1) (m2,w2,g2,p2) = case (w1==w2,w1>w2) of
 possibleOutcomes :: (Fractional n) => Player -> GameState -> n -> [(Int,n,GameState,Played)]
 possibleOutcomes p g n = map (possibleOutcome p g n) (validMoves p g)
 
+-- possiblePlacementOutcomes :: (Fractional n) => Player -> GameState -> n -> [(Int,n,GameState,Played)]
+-- possiblePlacementOutcomes p g n = map (possiblePlacementOutcome p g n) placementMOVES!!!
+
 possibleOutcome :: (Fractional n) => Player -> GameState -> n -> Played -> (Int,n,GameState,Played)
 possibleOutcome White g n played = let newState = modifyGameState ((played,0),(Passed,0),(addModifications played Passed g)) g
                                    in (1,n+(winFactor White newState),newState,played)
 possibleOutcome Black g n played = let newState = modifyGameState ((Passed,0),(played,0),(addModifications played Passed g)) g
                                    in (1,n+(winFactor Black newState),newState,played)
+
+-- possiblePLacementOutcome :: (Fractional n) => Player -> GameState -> n -> Played -> (Int,n,GameState,Played)
+-- possiblePlacementOutcome White g n played =
+-- possiblePlacementOutcome Black g n played =                                    
 
 winFactor :: (Fractional n) => Player -> GameState -> n
 winFactor p g = let b = theBoard g
