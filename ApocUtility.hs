@@ -17,6 +17,7 @@ module ApocUtility (
     snd4,
     thd4,
     frt4,
+    playedToMove,
     verifyMoveLegality,
     addModifications,
     BoardModification(Move,Delete,Place),
@@ -85,6 +86,9 @@ thd4 (a,b,c,d) = c
 
 frt4 :: (a,b,c,d) -> d
 frt4 (a,b,c,d) = d
+
+playedToMove :: Played -> [(Int,Int)]
+playedToMove (Played (src,dst)) = [src,dst]
 
 {- | Takes in a move and a player and a game state and returns if the move is valid in the form of of a played and a int 
  representing a invalid move and penalty 

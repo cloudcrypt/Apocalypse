@@ -16,11 +16,8 @@ import ApocUtility
 greedy   :: Chooser
 greedy g Normal p = do
     m <- optimalMove p g
-    return (Just (getGreedyChoice m))
+    return (Just (playedToMove m))
 greedy g PawnPlacement p = return Nothing
-
-getGreedyChoice :: Played -> [(Int,Int)]
-getGreedyChoice (Played (src,dst)) = [src,dst]
 
 optimalMove :: Player -> GameState -> IO Played
 optimalMove p g = do

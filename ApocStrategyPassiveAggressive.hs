@@ -31,13 +31,8 @@ passAgg gs Normal p = let moves = (filter (killMove gs) (validMoves p gs))
                         0 -> do return $ Nothing
                         _ -> do
                             ranNum <- randomRIO(0, ((length moves) -1))
-                            return $ Just (blah (moves !! ranNum))
+                            return $ Just (playedToMove (moves !! ranNum))
 passAgg gs PawnPlacement p = return Nothing
-
-
-blah :: Played -> [(Int,Int)] -- ^This method is used to convert a Played type into a touple
-blah (Played (src,dst)) = [src,dst] 
-
 
 killMove :: GameState -> Played -> Bool --This function will look through the defined board and will check if the value is an empty character. 
 killMove gs (Played (src, dst)) = (getFromBoard (theBoard gs) dst) /= E --If the character is empty it will return a boolean true.
