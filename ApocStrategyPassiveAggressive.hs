@@ -32,13 +32,20 @@ passAgg gs Normal p = let moves = (filter (killMove gs) (validMoves p gs))
                         _ -> do
                             ranNum <- randomRIO(0, ((length moves) -1))
                             return $ Just (playedToMove (moves !! ranNum))
-passAgg gs PawnPlacement p = return Nothing
+                           
+passAgg gs PawnPlacement p = do -- Find all of the empty cells on the board and randomly place the pawn in one of the locations
+                let cells = emptyCells g
+                ranNum2 <- (randomRIO (0, ((length cells) - 1)))
+                return (Just [(cells !! ranNum)])
 
 killMove :: GameState -> Played -> Bool --This function will look through the defined board and will check if the value is an empty character. 
 killMove gs (Played (src, dst)) = (getFromBoard (theBoard gs) dst) /= E --If the character is empty it will return a boolean true.
 
 
 
+-- | Gets the empty cells so that the pawn placement can happen in a random location
+emptyCells :: GameState -> [(Int,Int)]
+emptyCells g = filter (\x -> (getFromBoard (theBoard g) x)==E) cells
 
 
 
