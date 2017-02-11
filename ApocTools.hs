@@ -46,7 +46,7 @@ module ApocTools (
     pieceOf,
     playerOf,
     -- * Move descriptions
-    Played(Played,Passed,Goofed,Init,UpgradedPawn2Knight,PlacedPawn,BadPlacedPawn,NullPlacedPawn,None),
+    Played(Played,Passed,Goofed,{-GoofedFromOther,GoofedFromInvalid,GoofedFromEmpty,-}Init,UpgradedPawn2Knight,PlacedPawn,BadPlacedPawn,NullPlacedPawn,None),
     PlayType(Normal,PawnPlacement),
     -- * The game state
     GameState(GameState,blackPlay,blackPen,whitePlay,whitePen,theBoard),
@@ -123,12 +123,6 @@ instance {-# OVERLAPS #-} Show Board where show b = board2Str b
 
 -- | The intial state of the board
 initBoard       :: GameState
--- initBoard       = GameState Init 0 Init 0
---                   [ [E, E , E , E , E],
---                     [E, E , E , E , WP],
---                     [E, E , E , E , E],
---                     [E, E , E , E , BP],
---                     [E, E , E , E , E] ]
 initBoard       = GameState Init 0 Init 0
                   [ [WK, WP, WP, WP, WK],
                     [WP, E , E , E , WP],
@@ -203,6 +197,9 @@ playerOf WhitePawn   = White
 data Played = Played ((Int, Int), (Int, Int)) -- ^ A "normal" move.
             | Passed                          -- ^ A (legal) pass.
             | Goofed ((Int, Int), (Int, Int)) -- ^ An illegal move, penalty applied.
+--             | GoofedFromEmpty ((Int, Int), (Int, Int)) -- ^ An illegal move, penalty applied.
+--             | GoofedFromOther ((Int, Int), (Int, Int)) -- ^ An illegal move, penalty applied.
+--             | GoofedFromInvalid ((Int, Int), (Int, Int)) -- ^ An illegal move, penalty applied.
             | Init                            -- ^ No one has moved yet.
             | UpgradedPawn2Knight (Int,Int)   -- ^ A pawn reached the other side when <2 knights.
             | PlacedPawn ((Int, Int), (Int, Int)) -- ^ A pawn that's been placed in any empty space after having reached the far end of the board.
