@@ -1,29 +1,19 @@
 {- |
 Module      : Main
-Description : Template to get you started on the CPSC 449 Winter 2016 Apocalypse assignment.
-Copyright   : Copyright 2016, Rob Kremer (rkremer@ucalgary.ca), University of Calgary.
-License     : Permission to use, copy, modify, distribute and sell this software
-              and its documentation for any purpose is hereby granted without fee, provided
-              that the above copyright notice appear in all copies and that both that
-              copyright notice and this permission notice appear in supporting
-              documentation. The University of Calgary makes no representations about the
-              suitability of this software for any purpose. It is provided "as is" without
-              express or implied warranty.
+Description : Main module of Apocalypse game.
+Copyright   : (c) 2017 Daniel Dastoor, James Gilders, Carlin Liu, Teresa Van, Thomas Vu
+License     : None
 Maintainer  : rkremer@ucalgary.ca
 Stability   : experimental
-Portability : ghc 7.10.2 - 7.10.3
+Portability : ghc 7.10.2 - 8.0.2
 
-This module is used for CPSC 449 for the Apocalypse assignment.
-
-Feel free to modify this file as you see fit.
-
+This module is the main entry point for the Apocalypse game, where input is taken
+in from the user, and turns are processed until the end game state is reached.
 -}
 
 module Main (
       -- * Main
       main, main',
-      -- * Utility functions
-      --replace, replace2
       ) where
 
 import Data.Maybe (fromJust, isNothing)
@@ -39,10 +29,12 @@ import ApocStrategies
 -- | The main entry, which just calls 'main'' with the command line arguments.
 main = main' (unsafePerformIO getArgs)
 
-{- | We have a main' IO function so that we can either:
-
-     1. call our program from GHCi in the usual way
-     2. run from the command line by calling this function with the value from (getArgs)
+{- | 
+     The main function validates the number of command line arguments, and will either parse
+     them or get input from the user and parse it, starting the game using the parsed data, or
+     print the list of strategies when the arguments are invalid.
+     main' can be called either by calling the program from GHCi in the usual way, or by running
+     the program from the command line by calling this function with the value from (getArgs).
 -}
 main'           :: [String] -> IO ()
 main' args = do
@@ -62,6 +54,11 @@ main' args = do
     _ -> do
       displayStrategies
 
+{- |
+    Processes a turn, first checking for the game over state, and then getting 
+    a move from a black and white strategy. After performing a move, checks game
+    over state before verifying pawn upgrade state and recursing.
+-}
 processTurn     :: GameState -> ((String,Chooser),(String,Chooser)) -> IO ()
 processTurn g (bChooser,wChooser) = do
   putStrLn (show g)
@@ -79,11 +76,21 @@ processTurn g (bChooser,wChooser) = do
           verifiedState <- verifyPawnUpgrade newState (snd wChooser) (snd bChooser)
           processTurn verifiedState (bChooser,wChooser)
 
+{- |
+    Verifies the pawn upgrade state by processing a pawn upgrade for both black
+    and white players.
+-}
 verifyPawnUpgrade  :: GameState -> Chooser -> Chooser -> IO GameState
 verifyPawnUpgrade g wChooser bChooser = do
   state <- processPawnUpgrade (whitePlay g) White g wChooser bChooser
   processPawnUpgrade (blackPlay g) Black state wChooser bChooser
 
+{- |
+    If a player has performed an upgradeable move, processes a pawn upgrade
+    by either upgrading a pawn if number of player's knights < 2, or getting a
+    pawn placement move from the player's strategy and performing it, if the
+    number of player's knights == 2.
+-}
 processPawnUpgrade :: Played -> Player -> GameState -> Chooser -> Chooser -> IO GameState
 processPawnUpgrade (Played move) player g wChooser bChooser
   | (upgradeableMove (Played move) player g) = do
@@ -97,9 +104,10 @@ processPawnUpgrade (Played move) player g wChooser bChooser
     return g
 processPawnUpgrade _ _ g _ _ = do return g
 
-
-{- |This function will take in a player, a move and a gamestate. It will process the white and black players separately. It will 
-call the upgradePawn2Knight method on the specified location and will then return the new modified gamestate.
+{- |
+    Upgrades a pawn to a knight for a specific player at a specific coordinate
+    by modifying the game state with a UpgradedPawn2Knight (x,y) move for that player
+    at that coordinate.
 -}
 performPawnUpgrade :: Player -> Played -> GameState -> GameState
 performPawnUpgrade White (Played (_,(x2,y2))) g = let wPlay = UpgradedPawn2Knight (x2,y2)
@@ -109,20 +117,28 @@ performPawnUpgrade Black (Played (_,(x2,y2))) g = let wPlay = None
                                                       bPlay = UpgradedPawn2Knight (x2,y2)
                                                   in modifyGameState ((wPlay,0),(bPlay,0),(addModifications bPlay wPlay g)) g
 
-
-{- |This function will take in a src and destination of a move along with the player and gamestate. It will then call the 
-modifyGameState function after it verifies the move location.
+{- |
+    Verifies a pawn placement move given a move and src location in verifyPawnPlace,
+    and then passes verified tuple from verifyPawnPlace to modifyGameState to perform
+    the placement.
 -}
 performPawnPlace  :: Maybe [(Int,Int)] -> (Int,Int) -> Player -> GameState -> GameState
 performPawnPlace move src p g = modifyGameState (verifyPawnPlace move src p g) g
 
--- check stuff
--- resolve issues
--- modify black and white moves (coordinates accordingly)
--- then call modifyGameState twice as we are doing now
+{- |
+    Verifies a normal move given a white and black move in verifyMoves,
+    and then passes verified tuple from verifyPawnPlace to modifyGameState to perform
+    the moves.
+-}
 performMoves    :: Maybe [(Int,Int)] -> Maybe [(Int,Int)] -> GameState -> GameState
 performMoves white black g = modifyGameState (verifyMoves white black g) g
 
+{- |
+    Verifies a normal white and black move, generating a tuple that can be passed to
+    modifyGameState. To generate the tuple, checks moves, assigning Passed and penalty
+    of 0 if Nothing, or a (Played,Int) tuple from verifyMoveLegality otherwise, and generates
+    a list of board modifications based on the verified white and black moves.
+-}
 verifyMoves     :: Maybe [(Int,Int)] -> Maybe [(Int,Int)] -> GameState -> ((Played, Int), (Played, Int), [BoardModification])
 verifyMoves white black g = let (wPlay, wPenalty) = if white==Nothing 
                                                     then (Passed, 0)
@@ -134,6 +150,12 @@ verifyMoves white black g = let (wPlay, wPenalty) = if white==Nothing
                                 (bPlay, bPenalty),
                                 (addModifications wPlay bPlay g))
 
+{- |
+    Verifies a pawn placement move, generating a tuple that can be passed to
+    modifyGameState. To generate the tuple, checks move, assigning NullPlacedPawn and penalty
+    of 1 if Nothing, or a (Played,Int) tuple from verifyPawnPlaceLegality otherwise, and generates
+    a list of board modifications based on the verified placement move.
+-}
 verifyPawnPlace  :: Maybe [(Int,Int)] -> (Int,Int) -> Player -> GameState -> ((Played, Int), (Played, Int), [BoardModification])
 verifyPawnPlace move src p g = let (play, penalty) = if move==Nothing
                                                      then (NullPlacedPawn, 1)
@@ -146,15 +168,23 @@ verifyPawnPlace move src p g = let (play, penalty) = if move==Nothing
                                               (play, penalty),
                                               (addModifications play None g))                 
 
+{- |
+    Verifies a the legality of a pawn placement move, from src cell xy1
+    to dst cell xy2. If move is valid, outputs a Played of PlacedPawn and penalty
+    of 0. If move is invalid, outputs a Played of BadPlacedPawn and a penalty of 1.
+-}
 verifyPawnPlaceLegality :: [(Int, Int)] -> GameState -> (Played, Int)
 verifyPawnPlaceLegality (xy1:xy2:_) g = case (getFromBoard (theBoard g) xy2) of
                                     E -> ((PlacedPawn (xy1,xy2)), 0)
                                     _ -> ((BadPlacedPawn (xy1,xy2)), 1)                                                                           
 
 
-{- |This function will check if the end game state has been reached. It will first check if there is a draw by the number of
-pawns of both teams ==0. Then it will check either white or black for penalties and then compare the number of pawns of the
-black and white teams and if it is zero, it will call the gameoverstring method.
+{- |
+    Checks if the end game state has been reached. It will first check if there is a draw if the number of
+    pawns of both players is 0. Then it will check either white or black for penalty == 2 and then compare the number of pawns of the
+    black and white teams to 0. Then it will check if both players have passed in the same turn, and compare the number of pawns
+    for the players. If there is a draw between the players, or if a player has penalty == 2 or number of pawns == 0, or if both
+    players passed in the last turn, it will then then generate through gameOverString and output a generated game over string.
 -}
 gameOverCheck :: GameState -> String -> String -> Maybe String
 gameOverCheck g wChooserStr bChooserStr
@@ -170,6 +200,6 @@ gameOverCheck g wChooserStr bChooserStr
           bPawns = pieceCount (theBoard g) Black Pawn
 
 
--- |This method will display the end game string along with the strategies chosen and number of pawns remaining.
+-- |This method will generate an end game string along with the strategies chosen and number of pawns remaining for both players.
 gameOverString :: String -> Int -> Int -> String -> String -> String
 gameOverString winner wPawns bPawns wChooserStr bChooserStr = winner ++ "   Black (" ++ bChooserStr ++ "): " ++ (show bPawns) ++ "  White (" ++ wChooserStr ++ "): " ++ (show wPawns)
