@@ -1,9 +1,10 @@
 {- |
-Module: ApocUtility.hs
-Description: Cpsc449 W2017 - Group 24 
-Copyright: (c) Daniel Dastoor, James Gilders, Carlin Liu, Teresa Van, Thomas Vu
-License: None (Assignment)
-Portability: ghc 7.10.3 , Needs Cabal
+Module      : ApocUtility
+Description : Utility functions needed for Apocalypse game.
+Copyright   : (c) 2017 Daniel Dastoor, James Gilders, Carlin Liu, Teresa Van, Thomas Vu
+License     : None
+Stability   : experimental
+Portability : ghc 7.10.2 - 8.0.2, requires System.Random
 -}
 module ApocUtility (
     PieceType(Pawn,Knight),
@@ -33,7 +34,11 @@ module ApocUtility (
 import ApocTools
 import Data.Char (isDigit, digitToInt)
 
-data PieceType  = Pawn | Knight deriving (Eq)
+-- | The possible types of pieces in the game board.
+data PieceType  = Pawn    -- ^ A piece of type Pawn
+                | Knight  -- ^ A piece of type Knight
+                deriving (Eq)
+
 -- | Given a 'Cell', return the corresponding 'Piece'.
 pieceTypeOf     :: Cell -> PieceType
 pieceTypeOf BK  = Knight
@@ -41,29 +46,30 @@ pieceTypeOf WK  = Knight
 pieceTypeOf BP  = Pawn
 pieceTypeOf WP  = Pawn 
 
+-- | Outputs true if two cells contain pieces belonging to the same player, false otherwise.
 samePlayer              :: Cell -> Cell -> Bool
 samePlayer cell1 cell2  = case ((cell1==E) || (cell2==E)) of
                           True -> False
                           False -> (playerOf (pieceOf cell1))==(playerOf (pieceOf cell2))
 
+-- | Given a player, outputs the opposite player.
 otherPlayer     :: Player -> Player
 otherPlayer White = Black
 otherPlayer Black = White                  
 
--- | Deals with the upgrading of pawns pattern matched, for each player
-
+-- | Outputs true if the last Played move of a player has left a pawn in an upgradeable state,
+-- and false otherwise.
 upgradeableMove :: Played -> Player -> GameState -> Bool
 upgradeableMove (Played (_,(x2,y2))) White g = ((getFromBoard (theBoard g) (x2,y2))==WP && y2==4)
 upgradeableMove (Played (_,(x2,y2))) Black g = ((getFromBoard (theBoard g) (x2,y2))==BP && y2==0)
 
--- | calculates the number of pawns for each player
-
+-- | Outputs the number of a specific PieceType on the board for a specific Player.
 pieceCount     :: Board -> Player -> PieceType -> Int
 pieceCount [] _ _ = 0
 pieceCount (x:xs) p pt = (pieceCountRow x p pt) + (pieceCount xs p pt)
 
--- | calculates the number of pieces in each row and returns that as an int
-
+-- | Calculates the number of a specific PieceType in a row of the board, and outputs 
+-- that as an int.
 pieceCountRow  :: [Cell] -> Player -> PieceType -> Int
 pieceCountRow [] _ _ = 0
 pieceCountRow (E:xs) p pt = pieceCountRow xs p pt
@@ -71,34 +77,42 @@ pieceCountRow (x:xs) p pt = if ((playerOf (pieceOf x))==p && (pieceTypeOf x)==pt
                             then 1 + (pieceCountRow xs p pt)
                             else pieceCountRow xs p pt 
 
--- | Determins if an item is an element within an array
-
+-- | Outputs true if every element of an array is equal to some element, and false otherwise.
 isIdentical :: Eq a => a -> [a] -> Bool
 isIdentical a [] = True
 isIdentical a (x:xs) = case a==x of
                         True -> isIdentical a xs
                         False -> False                   
 
+-- | Outputs the first element in a 4-tuple.
 fst4 :: (a,b,c,d) -> a
 fst4 (a,b,c,d) = a
 
+-- | Outputs the second element in a 4-tuple.
 snd4 :: (a,b,c,d) -> b
 snd4 (a,b,c,d) = b
 
+-- | Outputs the third element in a 4-tuple.
 thd4 :: (a,b,c,d) -> c
 thd4 (a,b,c,d) = c
 
+-- | Outputs the fourth element in a 4-tuple.
 frt4 :: (a,b,c,d) -> d
 frt4 (a,b,c,d) = d
 
+-- | Converts a normal Played into an array containing the Played's src and dst coordinates.
 playedToMove :: Played -> [(Int,Int)]
 playedToMove (Played (src,dst)) = [src,dst]
 
+-- | Converts a PlacedPawn Played into an array containing the PlacedPawn's dst coordinate.
 placedPawnToMove :: Played -> [(Int,Int)]
 placedPawnToMove (PlacedPawn (src,dst)) = [dst]
 
-{- | Takes in a move and a player and a game state and returns if the move is valid in the form of of a played and a int 
- representing a invalid move and penalty 
+{- | 
+    Takes in a move and a player and a GameState and returns if the move is valid in the form of
+    a Played and an int representing a penalty amount. Validates move by checking source cell,
+    destination cell, player type of both cells, and through verifying the destination cell through
+    verifyPieceDest. If the move is invalid, returns a (Goofed,n) tuple where n is the penalty amount.
 -}
 verifyMoveLegality  :: [(Int, Int)] -> Player -> GameState -> (Played, Int)
 verifyMoveLegality move p g = let (x1,y1) = (move !! 0)
@@ -112,10 +126,10 @@ verifyMoveLegality move p g = let (x1,y1) = (move !! 0)
                                          then ((Played ((x1,y1), (x2,y2))), 0)
                                          else ((Goofed ((x1,y1), (x2,y2))), 1)
                                          
-{- Takes in the piece type and two cells representing the destination of the piece as well as the source
-coordinates and based on the piece type will make the piece move to the new location.
+{- |
+    Given a PieceType, source Cell type, destination Cell type, and source and destination coordinates, returns
+    true if the destination cell is valid, and false otherwise.
 -}
-
 verifyPieceDest   :: PieceType -> Cell -> Cell -> (Int, Int) -> (Int, Int) -> Bool
 verifyPieceDest Knight _ dstCell (x1,y1) (x2,y2) = let columnDiff = abs (x2 - x1)
                                                        rowDiff = abs (y2 - y1)
@@ -171,14 +185,10 @@ modifyGameState ((wPlay, wPenalty), (bPlay, bPenalty), mods) g =
          ((whitePen g) + wPenalty)
          (applyBoardModifications mods (theBoard g))
          
-{-data type board modification is a list of one of three types, a move, which represents the destination and source 
-delete which takes the coordinates of the location to delete and place cell which contains the coordinates of a placement
--}
-
-data BoardModification = Move (Int, Int) (Int, Int)
-                       | Delete (Int, Int)
-                       | Place Cell (Int, Int)
-                       deriving (Show)
+-- | Types of BoardModifications that can be applied to the game board.
+data BoardModification = Move (Int, Int) (Int, Int) -- ^ Move, represented by a destination and source cell
+                       | Delete (Int, Int)          -- ^ Delete, represented by a cell to be deleted
+                       | Place Cell (Int, Int)      -- ^ Place, represented by a Cell and the location for it's placement
                        
 -- | apply board modifications takes in an array of board modifications and then the current board and then returns the updated board
 
