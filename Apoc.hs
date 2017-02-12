@@ -65,23 +65,19 @@ main' args = do
 processTurn     :: GameState -> ((String,Chooser),(String,Chooser)) -> IO ()
 processTurn g (bChooser,wChooser) = do
   putStrLn (show g)
-  black <- (snd bChooser) g Normal Black
-  white <- (snd wChooser) g Normal White
-  let newState = performMoves white black g
-  case (gameOverCheck newState (fst wChooser) (fst bChooser)) of
-    Just str -> do 
-      putStrLn (show newState)
-      putStrLn str
+  case (gameOverCheck g (fst wChooser) (fst bChooser)) of
+    Just str -> do putStrLn str
     Nothing -> do
-      verifiedState <- verifyPawnUpgrade newState (snd wChooser) (snd bChooser)
-      processTurn verifiedState (bChooser,wChooser)
-  -- case (gameOverCheck g (fst wChooser) (fst bChooser)) of
-  --   Just str -> do putStrLn str
-  --   Nothing -> do
-  --     black <- (snd bChooser) g Normal Black
-  --     white <- (snd wChooser) g Normal White
-  --     newState <- verifyPawnUpgrade (performMoves white black g) (snd wChooser) (snd bChooser)
-  --     processTurn newState (bChooser,wChooser)
+      black <- (snd bChooser) g Normal Black
+      white <- (snd wChooser) g Normal White
+      let newState = performMoves white black g
+      case (gameOverCheck newState (fst wChooser) (fst bChooser)) of
+        Just str -> do 
+          putStrLn (show newState)
+          putStrLn str
+        Nothing -> do
+          verifiedState <- verifyPawnUpgrade newState (snd wChooser) (snd bChooser)
+          processTurn verifiedState (bChooser,wChooser)
 
 verifyPawnUpgrade  :: GameState -> Chooser -> Chooser -> IO GameState
 verifyPawnUpgrade g wChooser bChooser = do
