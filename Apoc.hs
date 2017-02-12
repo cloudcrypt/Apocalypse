@@ -140,7 +140,7 @@ verifyMoves white black g = let (wPlay, wPenalty) = if white==Nothing
 
 verifyPawnPlace  :: Maybe [(Int,Int)] -> (Int,Int) -> Player -> GameState -> ((Played, Int), (Played, Int), [BoardModification])
 verifyPawnPlace move src p g = let (play, penalty) = if move==Nothing
-                                                     then (NullPlacedPawn, 0)
+                                                     then (NullPlacedPawn, 1)
                                                      else (verifyPawnPlaceLegality ([src] ++ (fromJust move)) g)   
                                in case p of
                                     White -> ((play, penalty),
