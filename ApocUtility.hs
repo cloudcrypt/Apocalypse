@@ -23,6 +23,7 @@ module ApocUtility (
     addModifications,
     BoardModification(Move,Delete,Place),
     modifyGameState,
+    noValidMoves,
     validMoves,
     validPlacements,
     cells,
@@ -202,6 +203,8 @@ modifyBoard (Place c (x,y)) b = (replace2 b
 
 --AI Utilty function---------------------------------------------------------------
 
+noValidMoves :: (Fractional n, Eq n, Ord n) => Player -> [(Int,n,GameState,Played)] -> Bool
+noValidMoves player outcomes = isIdentical 0 (map (\(_,_,g,_) -> length $ validMoves player g) outcomes)
 
 {- Takes in the player and the game state as well as an array of played moves and calls the apropriate functions to obtain a list
 of all valid moves
