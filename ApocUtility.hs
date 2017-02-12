@@ -18,11 +18,13 @@ module ApocUtility (
     thd4,
     frt4,
     playedToMove,
+    placedPawnToMove,
     verifyMoveLegality,
     addModifications,
     BoardModification(Move,Delete,Place),
     modifyGameState,
     validMoves,
+    validPlacements,
     cells,
     emptyCells
     ) where
@@ -90,6 +92,9 @@ frt4 (a,b,c,d) = d
 
 playedToMove :: Played -> [(Int,Int)]
 playedToMove (Played (src,dst)) = [src,dst]
+
+placedPawnToMove :: Played -> [(Int,Int)]
+placedPawnToMove (PlacedPawn (src,dst)) = [dst]
 
 {- | Takes in a move and a player and a game state and returns if the move is valid in the form of of a played and a int 
  representing a invalid move and penalty 
@@ -172,6 +177,7 @@ delete which takes the coordinates of the location to delete and place cell whic
 data BoardModification = Move (Int, Int) (Int, Int)
                        | Delete (Int, Int)
                        | Place Cell (Int, Int)
+                       deriving (Show)
                        
 -- | apply board modifications takes in an array of board modifications and then the current board and then returns the updated board
 
@@ -208,6 +214,9 @@ validMoves p g = map fst (filter validMove (map (\x -> verifyMoveLegality x p g)
 validMove :: (Played,Int) -> Bool
 validMove (Played _,_) = True
 validMove (_,_) = False
+
+validPlacements :: GameState -> (Int,Int) -> [Played]
+validPlacements g src = map (\dst -> PlacedPawn (src,dst)) (emptyCells g)
 
 -- | Creates an array of all possible moves but does not account for collisions.
 
