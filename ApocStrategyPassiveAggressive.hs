@@ -4,13 +4,11 @@ Description: Cpsc449 W2017 - Group 24
 Copyright: (c) Daniel Dastoor, James Gilders, Carlin Liu, Teresa Van, Thomas Vu
 License: None (Assignment)
 Portability: ghc 7.10.3 , Needs Cabal
--}
-
-{- |
 This class is a passive aggressive strategy. The AI will pass if there are no available kill moves within 
 the reach of its pieces. It will calculate all the possible moves at the start and will filter out the moves
 that will be kill moves. It will then check if there are kill moves. If not it will pass.
 -}
+
 module ApocStrategyPassiveAggressive(
     passAgg
     ) where

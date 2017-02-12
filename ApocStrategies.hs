@@ -1,11 +1,12 @@
 {- |
-Module: ApocStrategies.hs
-Description: Cpsc449 W2017 - Group 24 
-Copyright: (c) Daniel Dastoor, James Gilders, Carlin Liu, Teresa Van, Thomas Vu
-License: None (Assignment)
-Portability: ghc 7.10.3 , Needs Cabal
+Module      : ApocStrategies
+Description : Functions for getting, displaying, and parsing/validating strategies.
+Copyright   : (c) 2017 Daniel Dastoor, James Gilders, Carlin Liu, Teresa Van, Thomas Vu
+License     : None
+Stability   : experimental
+Portability : ghc 7.10.2 - 8.0.2, requires System.Random
 -}
-module ApocStrategies(
+module ApocStrategies (
     strategies,
     displayStrategies,
     validateStrategies,
@@ -21,14 +22,17 @@ import ApocStrategyPassiveAggressive
 import ApocStrategyRandom
 import ApocStrategyJoke
 
+-- | List of strategy names and their associated Chooser functions.
 strategies  :: [(String,Chooser)]
 strategies = [("human",human),("greedy",greedy),("passiveAggressive",passAgg),("random",randomChoice),("joke",joke)]
 
+-- | Displays all strategies console.
 displayStrategies :: IO ()
 displayStrategies = do 
     putStrLn "Possible strategies:"
     printStrategies strategies
 
+-- | Prints name of each strategy to the console, using correct formatting.
 printStrategies :: [(String,Chooser)] -> IO ()
 printStrategies [] = return ()
 printStrategies (x:xs) = do

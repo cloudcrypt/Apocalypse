@@ -3,9 +3,8 @@ Module      : Main
 Description : Main module of Apocalypse game.
 Copyright   : (c) 2017 Daniel Dastoor, James Gilders, Carlin Liu, Teresa Van, Thomas Vu
 License     : None
-Maintainer  : rkremer@ucalgary.ca
 Stability   : experimental
-Portability : ghc 7.10.2 - 8.0.2
+Portability : ghc 7.10.2 - 8.0.2, requires System.Random
 
 This module is the main entry point for the Apocalypse game, where input is taken
 in from the user, and turns are processed until the end game state is reached.
