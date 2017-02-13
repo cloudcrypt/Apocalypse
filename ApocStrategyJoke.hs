@@ -16,7 +16,7 @@ import ApocTools
 import ApocUtility
 import System.Random
 
-
+-- |On its turn it will pass 
 joke :: Chooser
 joke gs Normal p = return Nothing
 joke gs PawnPlacement p = return Nothing
