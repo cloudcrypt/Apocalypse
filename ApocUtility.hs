@@ -145,10 +145,11 @@ verifyPieceDest Pawn BP dstCell (x1,y1) (x2,y2) = if y2==(y1-1)
                                                        else (((abs (x2-x1))==1) && ((dstCell==WP) || (dstCell==WK)))
                                                   else False  
                                                   
-{- takes in the two moves of the two players in the form of two played types, and then the current game state
-and then returns an array of the modified board.
+{- |
+    Given a white and black Played move, and a GameState, outputs an array of BoardModifications
+    corresponding to the BoardModifications needed to be performed on the board in order to perform
+    the white and black Played move.
 -}
-
 addModifications     :: Played -> Played -> GameState -> [BoardModification]
 addModifications (Played ((ax1,ay1),(ax2,ay2))) (Played ((bx1,by1),(bx2,by2))) g = let cellA = getFromBoard (theBoard g) (ax1,ay1)
                                                                                        cellB = getFromBoard (theBoard g) (bx1,by1)
@@ -173,10 +174,11 @@ addModifications (PlacedPawn ((x1,y1),(x2,y2))) None g = let player = playerOf (
                                                               Black -> [Place BP (x2,y2)]                                                                                                             
 addModifications _ _ g = []  
 
-{- takes in the played moves from both players and the board modification array and the old game state and returns 
-the modified board with the penalties calculated.
+{- |
+    Modifies the game state with the white and black Played move and updates the penalty amount of both
+    players. Performs the two moves on the game board through applyBoardModifications. Outputs the modified
+    game state.
 -}
-
 modifyGameState :: ((Played, Int), (Played, Int), [BoardModification]) -> GameState -> GameState
 modifyGameState ((wPlay, wPenalty), (bPlay, bPenalty), mods) g = 
   GameState (bPlay)
@@ -190,14 +192,12 @@ data BoardModification = Move (Int, Int) (Int, Int) -- ^ Move, represented by a 
                        | Delete (Int, Int)          -- ^ Delete, represented by a cell to be deleted
                        | Place Cell (Int, Int)      -- ^ Place, represented by a Cell and the location for it's placement
                        
--- | apply board modifications takes in an array of board modifications and then the current board and then returns the updated board
-
+-- | Applies each BoardModification to the Board, outputting the newly modified board.
 applyBoardModifications   :: [BoardModification] -> Board -> Board
 applyBoardModifications [] b = b
 applyBoardModifications (x:xs) b = applyBoardModifications xs (modifyBoard x b)
 
--- | Is the actual act of instantianting the specific changes to the board by taking in the board and the board modifications
-
+-- | Instantiates the specific BoardModification to the board by taking in the board and the board modification to be applied.
 modifyBoard   :: BoardModification -> Board -> Board
 modifyBoard (Move (x1,y1) (x2,y2)) b = (replace2 (replace2 b
                                                    (x2,y2)
@@ -213,51 +213,53 @@ modifyBoard (Place c (x,y)) b = (replace2 b
 
 --AI Utilty function---------------------------------------------------------------
 
+-- | Returns true if none of the GameStates in an array of [(Int,n,GameState,Played)] have any valid moves, and false otherwise.
 noValidMoves :: (Fractional n, Eq n, Ord n) => Player -> [(Int,n,GameState,Played)] -> Bool
 noValidMoves player outcomes = isIdentical 0 (map (\(_,_,g,_) -> length $ validMoves player g) outcomes)
 
-{- Takes in the player and the game state as well as an array of played moves and calls the apropriate functions to obtain a list
-of all valid moves
+{- |
+    Given a Player and GameState, outputs an array of all possible and valid moves for that Player, by 
+    filtering the list of all possible moves from possibleMoves by verifyMoveLegality.
 -}
 validMoves :: Player -> GameState -> [Played]
 validMoves p g = map fst (filter validMove (map (\x -> verifyMoveLegality x p g) (possibleMoves p g)))
 
--- | determines if any particular pair of possibble moves is vaild
-
+-- | Outputs true if the Played move is of type Played, and false otherwise.
 validMove :: (Played,Int) -> Bool
 validMove (Played _,_) = True
 validMove (_,_) = False
 
+{- |
+    Given a GameState and source cell, outputs an array of all possible and valid placement moves
+    for that Player, by generating a list of all PlacedPawn moves from the source cell to every
+    vacant cell on the board.
+-}
 validPlacements :: GameState -> (Int,Int) -> [Played]
 validPlacements g src = map (\dst -> PlacedPawn (src,dst)) (emptyCells g)
 
--- | Creates an array of all possible moves but does not account for collisions.
-
+-- | Outputs an array of all possible valid and invalid moves for every piece of the given player type.
 possibleMoves :: Player -> GameState -> [[(Int,Int)]]
 possibleMoves p g = foldr (++) [] (map moves (playerCells p g))
 
--- | This creates every possible moves without regard for peice type
-
+-- | Outputs an array of all moves from the source cell to every cell on the board.
 moves :: (Int,Int) -> [[(Int,Int)]]
 moves src = foldr (++) [] (map (\x -> map (\y -> [src,(x,y)]) [0..4]) [0..4])
 
--- | creates an array of all cells
-
+-- | Outputs an array of all cells on the board.
 cells :: [(Int,Int)]
 cells = foldr (++) [] (map (\x -> map (\y -> (x,y)) [0..4]) [0..4])
 
--- | Determins which cells are occupied by each player
-
+-- | Given a player and GameState, outputs an array of all cells containing a piece belonging to that player.
 playerCells :: Player -> GameState -> [(Int,Int)]
 playerCells p g = filter (playerCell p g) cells
 
--- | checks if a specific cell belongs to a player
-
+-- | Given a player, GameState, and cell coordinate, outputs true if the cell contains a piece belonging to that
+-- player, and false otherwise.
 playerCell :: Player -> GameState -> (Int,Int) -> Bool
 playerCell p g coord = let cell = getFromBoard (theBoard g) coord
                        in (cell/=E && (playerOf (pieceOf cell))==p)
 
--- | Gets the empty cells so that the pawn placement can happen in a random location
+-- | Outputs an array of all empty cells in the board.
 emptyCells :: GameState -> [(Int,Int)]
 emptyCells g = filter (\x -> (getFromBoard (theBoard g) x)==E) cells                       
 
