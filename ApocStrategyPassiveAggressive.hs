@@ -18,10 +18,11 @@ import ApocUtility
 import System.Random
 
 
-{- |This method will first filter out the killmoves and valid moves from the user
-sepcified board. It will then check the length of the list and if the list is empty
-(length 0) nothing is returned. If there is something, it will convert the moves to 
-a touple and will return. For pawnplacement, nothing is returned.
+{- |
+    This method will first filter out the killmoves and valid moves from the user
+    sepcified board. It will then check the length of the list and if the list is empty
+    (length 0) nothing is returned. If there is something, it will convert the moves to 
+    a touple and will return. For pawnplacement, nothing is returned.
 -}
 passAgg :: Chooser
 passAgg gs Normal p = let moves = (filter (killMove gs) (validMoves p gs))
@@ -30,11 +31,16 @@ passAgg gs Normal p = let moves = (filter (killMove gs) (validMoves p gs))
                         _ -> do
                             ranNum <- randomRIO(0, ((length moves) -1))
                             return $ Just (playedToMove (moves !! ranNum))
-                           
-passAgg gs PawnPlacement p = do -- Find all of the empty cells on the board and randomly place the pawn in one of the locations
+
+-- |Find all of the empty cells on the board and randomly place the pawn in one of the locations
+passAgg gs PawnPlacement p = do 
                 let cells = emptyCells gs
                 ranNum2 <- (randomRIO (0, ((length cells) - 1)))
                 return (Just [(cells !! ranNum2)])
 
-killMove :: GameState -> Played -> Bool --This function will look through the defined board and will check if the value is an empty character. 
-killMove gs (Played (src, dst)) = (getFromBoard (theBoard gs) dst) /= E --If the character is empty it will return a boolean true.
+{- |
+    This function will look through the defined board and will check if the value is an empty character.
+    If the character is empty it will return a boolean true.
+-}
+killMove :: GameState -> Played -> Bool  
+killMove gs (Played (src, dst)) = (getFromBoard (theBoard gs) dst) /= E 
