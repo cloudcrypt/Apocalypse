@@ -39,8 +39,9 @@ printStrategies (x:xs) = do
     putStrLn ("  " ++ (fst x))
     printStrategies xs
 
-{- Check to see if two given strategies are valid. If both strategies are valid, it will return the string,chooser pair
-for each, else it will return nothing.
+{- |
+    Check to see if two given strategies are valid. If both strategies are valid, it will return the string,chooser pair
+    for each, else it will return nothing.
 -}
 validateStrategies  :: [String] -> Maybe ((String,Chooser),(String,Chooser))
 validateStrategies [a,b] = let s1 = validateStrategy strategies a
@@ -49,8 +50,9 @@ validateStrategies [a,b] = let s1 = validateStrategy strategies a
                                 (True, True) -> Just (fromJust s1,fromJust s2)
                                 _ -> Nothing
 
-{- Check to see if a given strategy is valid by comparing it to an array of strategy pairs. If it is valid, it will return the 
-strategy strategy pair, else recursively validate.
+{- 
+    Check to see if a given strategy is valid by comparing it to an array of strategy pairs. If it is valid, it will return the 
+    strategy strategy pair, else recursively validate.
 -}
 validateStrategy    :: [(String,Chooser)] -> String -> Maybe (String,Chooser)
 validateStrategy [] s = Nothing
