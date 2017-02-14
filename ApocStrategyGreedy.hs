@@ -61,52 +61,79 @@ optimalPlacement p g src = do
     randNum <- (randomRIO (0, ((length optimalMoves) - 1)))
     return $ frt4 (optimalMoves !! randNum)
 
+{-|
+    Applies the best move to a given game state until the end game state is reached, incrementing the
+    moves int each time, in order to get the total number of moves needed to end the game, starting from
+    the given game state.
+-}
 neededMoves :: (Fractional n, Eq n, Ord n) => Player -> (Int,n,GameState,Played) -> (Int,n,GameState,Played)
 neededMoves player (moves,winF,g,played) = case ((length (validMoves player g))>0 && (pieceCount (theBoard g) (otherPlayer player) Pawn)>0) of
                                             False -> (moves,winF,g,played)
                                             True -> neededMoves player (moves+1,winF,(applyBestMove player g),played)
 
+-- | Applies the best move to a given game state by modifying the game state with the output of bestMove
 applyBestMove :: Player -> GameState -> GameState
 applyBestMove White g = let p = bestMove White g
                         in modifyGameState ((p,0),(None,0),(addModifications p None g)) g
 applyBestMove Black g = let p = bestMove Black g
                         in modifyGameState ((None,0),(p,0),(addModifications p None g)) g                        
 
+-- | Gets the best Played move for a given Player and GameState by choosing the outcome from the result
+-- of expandOutcomes with highest winFactor
 bestMove :: Player -> GameState -> Played
 bestMove p g = frt4 $ foldr maxWinFactor (10000,-1000,g,None) (expandOutcomes p (possibleOutcomes p g 0))
 
+{-|
+    Given a player and a list of outcomes, replaces each outcome by a list of all outcomes possible from the
+    initial outcome's game state, until there is at least one outcome with a higher winFactor than the rest.
+-}
 expandOutcomes :: (Fractional n, Eq n, Ord n) => Player -> [(Int,n,GameState,Played)] -> [(Int,n,GameState,Played)]
 expandOutcomes player outcomes = case ((length outcomes)>1 && (isIdentical (snd4 (outcomes !! 0)) (map snd4 outcomes)) && (not $ noValidMoves player outcomes)) of 
                                     False -> outcomes
                                     True -> expandOutcomes player $ foldr (++) [] (map (expandOutcome player) outcomes)
 
+{-|
+    Given a player and an outcome, replaces the outcome by a list of all outcomes possible from the
+    initial outcome's game state.
+-}
 expandOutcome :: (Fractional n, Eq n, Ord n) => Player -> (Int,n,GameState,Played) -> [(Int,n,GameState,Played)]
 expandOutcome player (_,n,g,played) = map (\(newMoves,newWinFactor,newG,_) -> (newMoves,newWinFactor,newG,played)) (possibleOutcomes player g n)
 
+-- | Given two (Int,n,GameState,Played) tuples, returns the one with smaller Int (number of moves).
 minMoves :: (Fractional n, Eq n, Ord n) => (Int,n,GameState,Played) -> (Int,n,GameState,Played) -> (Int,n,GameState,Played)
 minMoves (m1,w1,g1,p1) (m2,w2,g2,p2) = case (m1==m2,m1<m2) of
                                         (True,_) -> (m1,w1,g1,p1)
                                         (False,True) -> (m1,w1,g1,p1)
                                         (_,_) -> (m2,w2,g2,p2)                        
 
+-- | Given two (Int,n,GameState,Played) tuples, returns the one with larger n (win factor).
 maxWinFactor :: (Fractional n, Eq n, Ord n) => (Int,n,GameState,Played) -> (Int,n,GameState,Played) -> (Int,n,GameState,Played)
 maxWinFactor (m1,w1,g1,p1) (m2,w2,g2,p2) = case (w1==w2,w1>w2) of
                                             (True,_) -> (m1,w1,g1,p1)
                                             (False,True) -> (m1,w1,g1,p1)
                                             (_,_) -> (m2,w2,g2,p2)
 
+-- | Given a player, gameState, and initial winFactor amount, outputs a list of all possible gameStates
+-- reacheable in one turn, and with the initial winFactor amount added to the resultant gameState's winFactor amount
 possibleOutcomes :: (Fractional n) => Player -> GameState -> n -> [(Int,n,GameState,Played)]
 possibleOutcomes p g n = map (possibleOutcome p g n) (validMoves p g)
 
+-- | Given a Player, gameState, initial winFactor amount, and pawn source cell, outputs a list of all possible gameStates
+-- reachable after every possible Pawn Placement move, and with the initial winFactor amount added to the resultant gameState's
+-- winFactor amount.
 possiblePlacementOutcomes :: (Fractional n) => Player -> GameState -> (Int,Int) -> n -> [(Int,n,GameState,Played)]
 possiblePlacementOutcomes p g src n = map (possibleOutcome p g n) (validPlacements g src)
 
+-- | Given a Player, GameState, initial winFactor amount, and Played move, outputs a (Int,n,GameState,Played) tuple
+-- containing the GameState that would result after perfoming the Played move, and the initial winFactor amount added to the 
+-- resultant GameState's winFactor amount.
 possibleOutcome :: (Fractional n) => Player -> GameState -> n -> Played -> (Int,n,GameState,Played)
 possibleOutcome White g n played = let newState = modifyGameState ((played,0),(None,0),(addModifications played None g)) g
                                    in (1,n+(winFactor White newState),newState,played)
 possibleOutcome Black g n played = let newState = modifyGameState ((None,0),(played,0),(addModifications played None g)) g
                                    in (1,n+(winFactor Black newState),newState,played)                                   
 
+-- | Outputs the heuristic based winFactor amount for a given Player and GameState
 winFactor :: (Fractional n) => Player -> GameState -> n
 winFactor p g = let b = theBoard g
                     e = otherPlayer p

@@ -17,7 +17,6 @@ import ApocTools
 import System.Random
 
 -- |This generates a random decesion which choose some moves or a pass 
-
 randomChoice :: Chooser
 randomChoice g Normal p = do
                 let moves = validMoves p g
