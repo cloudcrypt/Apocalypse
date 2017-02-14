@@ -21,11 +21,10 @@ import ApocStrategyGreedy
 import ApocStrategyPassiveAggressive
 import ApocStrategyRandom
 import ApocStrategyJoke
-import ApocStrategyMinimax
 
 -- | List of strategy names and their associated Chooser functions.
 strategies  :: [(String,Chooser)]
-strategies = [("human",human),("greedy",greedy),("passiveAggressive",passAgg),("random",randomChoice),("joke",joke),("minimax",minimax)]
+strategies = [("human",human),("greedy",greedy),("passiveAggressive",passAgg),("random",randomChoice),("joke",joke)]
 
 -- | Displays all strategies console.
 displayStrategies :: IO ()
